@@ -88,7 +88,14 @@ namespace FFXIVRPCalendarPlugin.Models
         /// </summary>
         public DateTime? LastValidated { get; set; }
 
+        /// <summary>
+        /// Gets or sets the user local start time of the event.
+        /// </summary>
         public DateTime LocalStartTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets the user local end time of the event.
+        /// </summary>
         public DateTime LocalEndTime { get; set; }
     }
 }

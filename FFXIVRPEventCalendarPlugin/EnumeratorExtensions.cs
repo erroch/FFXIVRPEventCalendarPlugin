@@ -1,4 +1,10 @@
-﻿namespace FFXIVRPCalendarPlugin
+﻿//-----------------------------------------------------------------------
+// <copyright file="EnumeratorExtensions.cs" company="FFXIV RP Event Calendar">
+//     Copyright (c) FFXIV RP Event Calendar. All rights reserved.
+// </copyright>
+//-----------------------------------------------------------------------
+
+namespace FFXIVRPCalendarPlugin
 {
     using System;
     using System.ComponentModel;
@@ -31,14 +37,14 @@
             var description =
                 source
                     .GetType()?
-                    .GetMember(source.ToString() ?? String.Empty)
+                    .GetMember(source.ToString() ?? string.Empty)
                     .FirstOrDefault(m => m.DeclaringType == source.GetType())
                     ?.GetCustomAttribute<DescriptionAttribute>()
                     ?.Description;
 
             if (description == null)
             {
-                return source.ToString() ?? String.Empty;
+                return source.ToString() ?? string.Empty;
             }
 
             return description;

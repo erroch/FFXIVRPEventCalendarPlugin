@@ -1,49 +1,79 @@
-﻿namespace FFXIVRPCalendarPlugin.UI
-{
-    using ImGuiNET;
-    using Dalamud.Game.Gui;
-    using Dalamud.Game.ClientState;
-    using Dalamud.IoC;
+﻿//-----------------------------------------------------------------------
+// <copyright file="PluginUI.cs" company="FFXIV RP Event Calendar">
+//     Copyright (c) FFXIV RP Event Calendar. All rights reserved.
+// </copyright>
+//-----------------------------------------------------------------------
 
+namespace FFXIVRPCalendarPlugin.UI
+{
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Numerics;
     using System.Threading.Tasks;
+
+    using Dalamud.Game.ClientState;
+    using Dalamud.Game.Gui;
+    using Dalamud.IoC;
+
     using FFXIVRPCalendarPlugin;
     using FFXIVRPCalendarPlugin.Models;
     using FFXIVRPCalendarPlugin.Services;
 
-    // It is good to have this be disposable in general, in case you ever need it
-    // to do any cleanup
-    class PluginUI : IDisposable
+    using ImGuiNET;
+
+    /// <summary>
+    /// The primary plugin UI.
+    /// </summary>
+    public class PluginUI : IDisposable
     {
-        public static string Name => "FFXIV RP Event Calendar";
         private readonly EventsService eventsService;
-
         private readonly Configuration configuration;
-        //public List<RPEvent>? roleplayEvents;
-        private List<EventCategoryInfo>? EventCategories { get; set; }
-        private List<ESRBRatingInfo>? ESRBRatings { get; set; }
-
-        // private List<RPEvent>? filteredEvents;
-
-
-        public bool isLoading = false;
-        // private bool isEventsLoading = false;
-
         private readonly SettingsUI settingsUI;
         private readonly DebugUI debugUI;
-
-
-        // this extra bool exists for ImGui, since you can't ref a property
         private bool visible = false;
-        public bool Visible
+        private bool isLoading = false;
+        private bool disposedValue;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PluginUI"/> class.
+        /// </summary>
+        /// <param name="configuration">The Dalamud configuration.</param>
+        public PluginUI(Configuration configuration)
         {
-            get { return visible; }
-            set { visible = value; }
+            this.configuration = configuration;
+            this.LoadConfigureSettings();
+            this.settingsUI = new SettingsUI(configuration);
+            this.debugUI = new DebugUI();
+            this.eventsService = new EventsService(configuration);
         }
 
+        /// <summary>
+        /// Finalizes an instance of the <see cref="PluginUI"/> class.
+        /// </summary>
+        ~PluginUI()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            this.Dispose(disposing: false);
+        }
+
+        /// <summary>
+        /// Gets the name of the plugin UI window.
+        /// </summary>
+        public static string Name => "FFXIV RP Event Calendar";
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the PluginUI is visible.
+        /// </summary>
+        public bool Visible
+        {
+            get { return this.visible; }
+            set { this.visible = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the SettingsUI is visible.
+        /// </summary>
         public bool SettingsVisible
         {
             get
@@ -52,8 +82,10 @@
                 {
                     return this.settingsUI.Visible;
                 }
+
                 return false;
             }
+
             set
             {
                 if (this.settingsUI != null)
@@ -63,6 +95,9 @@
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the DebugUI is visible.
+        /// </summary>
         public bool DebugVisible
         {
             get
@@ -71,8 +106,10 @@
                 {
                     return this.debugUI.Visible;
                 }
+
                 return false;
             }
+
             set
             {
                 if (this.debugUI != null)
@@ -82,25 +119,23 @@
             }
         }
 
-        // passing in the image here just for simplicity
-        public PluginUI(Configuration configuration)
-        {
-            this.configuration = configuration;
-            this.LoadConfigureSettings();
-            this.settingsUI = new SettingsUI(configuration);
-            this.debugUI = new DebugUI(configuration);
-            this.eventsService = new EventsService(configuration);
-        }
+        private List<EventCategoryInfo>? EventCategories { get; set; }
 
+        private List<ESRBRatingInfo>? ESRBRatings { get; set; }
+
+        /// <summary>
+        /// Dispose of the <see cref="PluginUI"/> class.
+        /// </summary>
         public void Dispose()
         {
-            if (this.settingsUI != null)
-            {
-                this.settingsUI.Dispose();
-                this.eventsService.Dispose();
-            }
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            this.Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Draw the PluginUI.
+        /// </summary>
         public void Draw()
         {
             // This is our only draw handler attached to UIBuilder, so it needs to be
@@ -109,81 +144,49 @@
             // it actually makes sense.
             // There are other ways to do this, but it is generally best to keep the number of
             // draw delegates as low as possible.
-
             this.DrawMainWindow();
             this.settingsUI.Draw();
             this.debugUI.Draw();
         }
 
-        public void DrawMainWindow()
+        /// <summary>
+        /// Dispose of the <see cref="PluginUI"/> class.
+        /// </summary>
+        /// <param name="disposing">A value indicating whether the Dispose call has been called directly instead of from the finalizer.</param>
+        protected virtual void Dispose(bool disposing)
         {
-            if (!this.Visible)
+            if (!this.disposedValue)
             {
-                return;
-            }
-
-            this.eventsService.RefreshEvents();
-            ImGui.SetNextWindowSize(new Vector2(375, 330), ImGuiCond.FirstUseEver);
-            ImGui.SetNextWindowSizeConstraints(new Vector2(375, 330), new Vector2(float.MaxValue, float.MaxValue));
-            if (ImGui.Begin("FFXIV RP Event Calendar", ref visible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
-            {
-                TimeZoneInfo timeZoneInfo = TimeZoneInfo.Local;
-
-                ImGui.Text($"Local Time Zone: {timeZoneInfo.DisplayName} Current Offset: {timeZoneInfo.GetUtcOffset(DateTime.UtcNow)}");
-
-                ImGui.Spacing();
-
-                if (configuration.ConfigurationProperties.TimeZoneInfo != TimeZoneInfo.Local)
+                if (disposing)
                 {
-                    ImGui.Text($"Overriding with Configured Time Zone: {configuration.ConfigurationProperties.TimeZoneInfo.DisplayName}");
+                    if (this.settingsUI != null)
+                    {
+                        this.settingsUI.Dispose();
+                    }
+
+                    if (this.eventsService != null)
+                    {
+                        this.eventsService.Dispose();
+                    }
                 }
 
-                ImGui.Separator();
-
-                this.BuildOptions();
-
-                ImGui.Text("Event Lists");
-
-                if (ImGui.BeginTabBar("Roleplay Events"))
-                {
-                    if (ImGui.BeginTabItem("Server"))
-                    {
-                        ImGui.Text("Current Server Events");
-                        List<RPEvent>? serverEvents = eventsService.ServerEvents;
-                        BuildEventTable(serverEvents, "##ServerEvents");
-                        ImGui.EndTabItem();
-                    }
-                    if (ImGui.BeginTabItem("Data Center"))
-                    {
-                        ImGui.Text("Current Data Center Events");
-                        List<RPEvent>? serverEvents = eventsService.DatacenterEvents;
-                        BuildEventTable(serverEvents, "##DatacenterEvents");
-                        ImGui.EndTabItem();
-                    }
-                    if (ImGui.BeginTabItem("Region"))
-                    {
-                        ImGui.Text("Current Region Events");
-                        List<RPEvent>? serverEvents = eventsService.RegionEvents;
-                        BuildEventTable(serverEvents, "##RegionEvents");
-                        ImGui.EndTabItem();
-                    }
-                    if (ImGui.BeginTabItem("Test"))
-                    {
-                        ImGui.EndTabItem();
-                    }
-                    ImGui.EndTabBar();
-                }
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                this.disposedValue = true;
             }
+        }
 
-            ImGui.Separator();
-            ImGui.Text($"Event list last udpated on: {this.eventsService.LastRefreshLocalTime:g}");
-            ImGui.SameLine();
-            if (ImGui.Button("Refresh"))
+        private static void BuildToolTip(string description)
+        {
+            ImGui.TextDisabled("(?)");
+            if (ImGui.IsItemHovered())
             {
-                this.eventsService.RefreshEvents(forceRefresh: true);
+                ImGui.BeginTooltip();
+                ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35f);
+                ImGui.TextUnformatted(description);
+                ImGui.PopTextWrapPos();
+                ImGui.EndTooltip();
             }
-
-            ImGui.End();
         }
 
         private static void BuildEventTable(List<RPEvent>? eventList, string tableId)
@@ -194,13 +197,11 @@
                 return;
             }
 
-            Vector2 outerSize = new(0, ImGui.GetWindowHeight() - 170 - 35);
-            if (ImGui.BeginTable(tableId, 6,
-                ImGuiTableFlags.RowBg |
-                ImGuiTableFlags.Borders |
-                ImGuiTableFlags.SizingStretchProp |
-                ImGuiTableFlags.BordersInnerV |
-                ImGuiTableFlags.ScrollY,
+            Vector2 outerSize = new (0, ImGui.GetWindowHeight() - 170 - 35);
+            if (ImGui.BeginTable(
+                tableId,
+                6,
+                ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.ScrollY,
                 outerSize))
             {
                 ImGui.TableSetupColumn("Server");
@@ -230,6 +231,81 @@
 
                 ImGui.EndTable();
             }
+        }
+
+        private void DrawMainWindow()
+        {
+            if (!this.Visible)
+            {
+                return;
+            }
+
+            this.eventsService.RefreshEvents();
+            ImGui.SetNextWindowSize(new Vector2(375, 330), ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowSizeConstraints(new Vector2(375, 330), new Vector2(float.MaxValue, float.MaxValue));
+            if (ImGui.Begin("FFXIV RP Event Calendar", ref this.visible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            {
+                TimeZoneInfo timeZoneInfo = TimeZoneInfo.Local;
+
+                ImGui.Text($"Local Time Zone: {timeZoneInfo.DisplayName} Current Offset: {timeZoneInfo.GetUtcOffset(DateTime.UtcNow)}");
+
+                ImGui.Spacing();
+
+                if (this.configuration.ConfigurationProperties.TimeZoneInfo != TimeZoneInfo.Local)
+                {
+                    ImGui.Text($"Overriding with Configured Time Zone: {this.configuration.ConfigurationProperties.TimeZoneInfo.DisplayName}");
+                }
+
+                ImGui.Separator();
+
+                this.BuildOptions();
+
+                ImGui.Text("Event Lists");
+
+                if (ImGui.BeginTabBar("Roleplay Events"))
+                {
+                    if (ImGui.BeginTabItem("Server"))
+                    {
+                        ImGui.Text("Current Server Events");
+                        List<RPEvent>? serverEvents = this.eventsService.ServerEvents;
+                        BuildEventTable(serverEvents, "##ServerEvents");
+                        ImGui.EndTabItem();
+                    }
+
+                    if (ImGui.BeginTabItem("Data Center"))
+                    {
+                        ImGui.Text("Current Data Center Events");
+                        List<RPEvent>? serverEvents = this.eventsService.DatacenterEvents;
+                        BuildEventTable(serverEvents, "##DatacenterEvents");
+                        ImGui.EndTabItem();
+                    }
+
+                    if (ImGui.BeginTabItem("Region"))
+                    {
+                        ImGui.Text("Current Region Events");
+                        List<RPEvent>? serverEvents = this.eventsService.RegionEvents;
+                        BuildEventTable(serverEvents, "##RegionEvents");
+                        ImGui.EndTabItem();
+                    }
+
+                    if (ImGui.BeginTabItem("Test"))
+                    {
+                        ImGui.EndTabItem();
+                    }
+
+                    ImGui.EndTabBar();
+                }
+            }
+
+            ImGui.Separator();
+            ImGui.Text($"Event list last udpated on: {this.eventsService.LastRefreshLocalTime:g}");
+            ImGui.SameLine();
+            if (ImGui.Button("Refresh"))
+            {
+                this.eventsService.RefreshEvents(forceRefresh: true);
+            }
+
+            ImGui.End();
         }
 
         private void BuildOptions()
@@ -284,6 +360,7 @@
                         }
                     }
                 }
+
                 ImGui.NewLine();
                 ImGui.Separator();
                 ImGui.Text("CATEGROIES");
@@ -307,21 +384,21 @@
                     {
                         if (category.CategoryName != null)
                         {
-                            bool check = configuration.ConfigurationProperties.Categories.Contains(category.CategoryName);
+                            bool check = this.configuration.ConfigurationProperties.Categories.Contains(category.CategoryName);
                             if (ImGui.Checkbox(category.CategoryName, ref check))
                             {
                                 if (check)
                                 {
-                                    if (!configuration.ConfigurationProperties.Categories.Contains(category.CategoryName))
+                                    if (!this.configuration.ConfigurationProperties.Categories.Contains(category.CategoryName))
                                     {
-                                        configuration.ConfigurationProperties.Categories.Add(category.CategoryName);
+                                        this.configuration.ConfigurationProperties.Categories.Add(category.CategoryName);
                                     }
                                 }
                                 else
                                 {
-                                    if (configuration.ConfigurationProperties.Categories.Contains(category.CategoryName))
+                                    if (this.configuration.ConfigurationProperties.Categories.Contains(category.CategoryName))
                                     {
-                                        configuration.ConfigurationProperties.Categories.Remove(category.CategoryName);
+                                        this.configuration.ConfigurationProperties.Categories.Remove(category.CategoryName);
                                     }
                                 }
 
@@ -330,7 +407,7 @@
                             }
 
                             if (category.Description != null)
-                            { 
+                            {
                                 ImGui.SameLine();
                                 BuildToolTip(category.Description);
                             }
@@ -352,26 +429,13 @@
             }
         }
 
-        private static void BuildToolTip(string description)
-        {
-            ImGui.TextDisabled("(?)");
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.BeginTooltip();
-                ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35f);
-                ImGui.TextUnformatted(description);
-                ImGui.PopTextWrapPos();
-                ImGui.EndTooltip();
-            }
-        }
-
         private void LoadConfigureSettings()
         {
             if (!this.isLoading)
             {
                 this.isLoading = true;
 
-                Task<List<ESRBRatingInfo>>.Run(async () => await ConfigurationService.ESRBRatings(this.configuration.ConfigurationProperties)
+                Task<List<ESRBRatingInfo>>.Run(async () => await CalendarService.ESRBRatings(this.configuration.ConfigurationProperties)
                     .ContinueWith(t =>
                        {
                            if (t.IsFaulted)
@@ -385,17 +449,16 @@
                                {
                                    Plugin.ChatGui.PrintError($"Error getting Event Ratings");
                                }
+
                                this.ESRBRatings = new List<ESRBRatingInfo>();
                            }
                            else
                            {
                                this.ESRBRatings = t.Result;
                            }
-                       }
-                    )
-                );
+                       }));
 
-                Task.Run(async () => await ConfigurationService.EventCategories(this.configuration.ConfigurationProperties)
+                Task.Run(async () => await CalendarService.EventCategories(this.configuration.ConfigurationProperties)
                     .ContinueWith(t =>
                     {
                         if (t.IsFaulted)
@@ -414,9 +477,7 @@
                         {
                             this.EventCategories = t.Result;
                         }
-                    }
-                    )
-                );
+                    }));
             }
         }
     }
