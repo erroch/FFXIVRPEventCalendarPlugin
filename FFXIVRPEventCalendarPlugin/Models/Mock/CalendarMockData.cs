@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FFXIVRPCalendar.Mock
+namespace FFXIVRPCalendarPlugin.Models.Mock
 {
     public static class CalendarMockData
     {

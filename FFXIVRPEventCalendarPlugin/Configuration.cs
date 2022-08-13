@@ -1,7 +1,7 @@
 ﻿using Dalamud.Configuration;
 using Dalamud.Plugin;
 using System;
-using FFXIVRPCalendar.Models;
+using FFXIVRPCalendarPlugin.Models;
 
 namespace FFXIVRPCalendarPlugin
 {

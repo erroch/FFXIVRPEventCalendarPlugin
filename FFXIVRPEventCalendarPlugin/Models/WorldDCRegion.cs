@@ -1,4 +1,4 @@
-﻿namespace FFXIVRPCalendarPlugin
+﻿namespace FFXIVRPCalendarPlugin.Models
 {
     using System.ComponentModel;
 

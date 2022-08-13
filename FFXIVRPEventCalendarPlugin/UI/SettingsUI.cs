@@ -8,9 +8,8 @@
     using System.Linq;
     using System.Numerics;
     using System.Threading.Tasks;
-    using FFXIVRPCalendar;
-    using FFXIVRPCalendar.Services;
-    using FFXIVRPCalendar.Models;
+    using FFXIVRPCalendarPlugin.Services;
+    using FFXIVRPCalendarPlugin.Models;
 
     public class SettingsUI : IDisposable
     {

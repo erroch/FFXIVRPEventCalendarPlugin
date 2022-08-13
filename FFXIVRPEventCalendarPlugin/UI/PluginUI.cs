@@ -10,9 +10,8 @@
     using System.Linq;
     using System.Numerics;
     using System.Threading.Tasks;
-    using FFXIVRPCalendar.Services;
-    using FFXIVRPCalendar.Models;
     using FFXIVRPCalendarPlugin;
+    using FFXIVRPCalendarPlugin.Models;
     using FFXIVRPCalendarPlugin.Services;
 
     // It is good to have this be disposable in general, in case you ever need it
@@ -35,7 +34,7 @@
 
         private readonly SettingsUI settingsUI;
         private readonly DebugUI debugUI;
-        
+
 
         // this extra bool exists for ImGui, since you can't ref a property
         private bool visible = false;
@@ -47,15 +46,16 @@
 
         public bool SettingsVisible
         {
-            get 
-            { 
+            get
+            {
                 if (this.settingsUI != null)
                 {
                     return this.settingsUI.Visible;
                 }
-                return false; 
+                return false;
             }
-            set { 
+            set
+            {
                 if (this.settingsUI != null)
                 {
                     this.settingsUI.Visible = value;
@@ -194,16 +194,15 @@
                 return;
             }
 
-            Vector2 outerSize = new Vector2(0, ImGui.GetWindowHeight() - 170 - 35);
+            Vector2 outerSize = new(0, ImGui.GetWindowHeight() - 170 - 35);
             if (ImGui.BeginTable(tableId, 6,
                 ImGuiTableFlags.RowBg |
                 ImGuiTableFlags.Borders |
-                ImGuiTableFlags.SizingStretchProp | 
-                ImGuiTableFlags.BordersInnerV | 
+                ImGuiTableFlags.SizingStretchProp |
+                ImGuiTableFlags.BordersInnerV |
                 ImGuiTableFlags.ScrollY,
                 outerSize))
             {
-
                 ImGui.TableSetupColumn("Server");
                 ImGui.TableSetupColumn("Start Time");
                 ImGui.TableSetupColumn("Name");
@@ -231,7 +230,6 @@
 
                 ImGui.EndTable();
             }
-
         }
 
         private void BuildOptions()
@@ -247,34 +245,41 @@
                 {
                     if (this.configuration.ConfigurationProperties.Ratings.Count == 0)
                     {
-                        this.configuration.ConfigurationProperties.Ratings = this.ESRBRatings.Select(x => x.RatingName).ToList(); ;
+                        this.configuration.ConfigurationProperties.Ratings = this.ESRBRatings
+                            .Where(x => x.RatingName != null)
+                            .Select(x => x.RatingName ?? string.Empty)
+                            .ToList();
                     }
 
                     foreach (ESRBRatingInfo rating in this.ESRBRatings)
                     {
                         if (!rating.RequiresAgeValidation)
                         {
-                            bool check = this.configuration.ConfigurationProperties.Ratings.Contains(rating.RatingName);
-                            if (ImGui.Checkbox(rating.RatingName, ref check))
+                            if (rating.RatingName != null)
                             {
-                                if (check)
+                                bool check = this.configuration.ConfigurationProperties.Ratings.Contains(rating.RatingName);
+                                if (ImGui.Checkbox(rating.RatingName, ref check))
                                 {
-                                    if (!this.configuration.ConfigurationProperties.Ratings.Contains(rating.RatingName))
+                                    if (check)
                                     {
-                                        this.configuration.ConfigurationProperties.Ratings.Add(rating.RatingName);
+                                        if (!this.configuration.ConfigurationProperties.Ratings.Contains(rating.RatingName))
+                                        {
+                                            this.configuration.ConfigurationProperties.Ratings.Add(rating.RatingName);
+                                        }
                                     }
-                                }
-                                else
-                                {
-                                    if (this.configuration.ConfigurationProperties.Ratings.Contains(rating.RatingName))
+                                    else
                                     {
-                                        this.configuration.ConfigurationProperties.Ratings.Remove(rating.RatingName);
+                                        if (this.configuration.ConfigurationProperties.Ratings.Contains(rating.RatingName))
+                                        {
+                                            this.configuration.ConfigurationProperties.Ratings.Remove(rating.RatingName);
+                                        }
                                     }
-                                }
 
-                                this.configuration.Save();
-                                this.eventsService.FilterEvents();
+                                    this.configuration.Save();
+                                    this.eventsService.FilterEvents();
+                                }
                             }
+
                             ImGui.SameLine();
                         }
                     }
@@ -290,54 +295,63 @@
                 {
                     if (this.configuration.ConfigurationProperties.Categories == null)
                     {
-                        this.configuration.ConfigurationProperties.Categories = this.EventCategories.Select(x => x.CategoryName).ToList();
+                        this.configuration.ConfigurationProperties.Categories = this.EventCategories
+                            .Where(x => x.CategoryName != null)
+                            .Select(x => x.CategoryName ?? string.Empty)
+                            .ToList();
                     }
 
                     int itemCount = 0;
 
                     foreach (EventCategoryInfo category in this.EventCategories)
                     {
-                        bool check = configuration.ConfigurationProperties.Categories.Contains(category.CategoryName);
-                        if (ImGui.Checkbox(category.CategoryName, ref check))
+                        if (category.CategoryName != null)
                         {
-                            if (check)
+                            bool check = configuration.ConfigurationProperties.Categories.Contains(category.CategoryName);
+                            if (ImGui.Checkbox(category.CategoryName, ref check))
                             {
-                                if (!configuration.ConfigurationProperties.Categories.Contains(category.CategoryName))
+                                if (check)
                                 {
-                                    configuration.ConfigurationProperties.Categories.Add(category.CategoryName);
+                                    if (!configuration.ConfigurationProperties.Categories.Contains(category.CategoryName))
+                                    {
+                                        configuration.ConfigurationProperties.Categories.Add(category.CategoryName);
+                                    }
                                 }
+                                else
+                                {
+                                    if (configuration.ConfigurationProperties.Categories.Contains(category.CategoryName))
+                                    {
+                                        configuration.ConfigurationProperties.Categories.Remove(category.CategoryName);
+                                    }
+                                }
+
+                                this.configuration.Save();
+                                this.eventsService.FilterEvents();
+                            }
+
+                            if (category.Description != null)
+                            { 
+                                ImGui.SameLine();
+                                BuildToolTip(category.Description);
+                            }
+
+                            if (itemCount >= 5)
+                            {
+                                itemCount = 0;
                             }
                             else
                             {
-                                if (configuration.ConfigurationProperties.Categories.Contains(category.CategoryName))
-                                {
-                                    configuration.ConfigurationProperties.Categories.Remove(category.CategoryName);
-                                }
+                                itemCount++;
+                                ImGui.SameLine();
                             }
-
-                            this.configuration.Save();
-                            this.eventsService.FilterEvents();
                         }
-
-                        ImGui.SameLine();
-                        BuildToolTip(category.Description);
-                        if (itemCount >= 5)
-                        {
-                            itemCount = 0;
-                        }
-                        else
-                        {
-                            itemCount++;
-                            ImGui.SameLine();
-                        }
-
                     }
                 }
 
                 ImGui.Separator();
             }
         }
-          
+
         private static void BuildToolTip(string description)
         {
             ImGui.TextDisabled("(?)");
@@ -357,7 +371,7 @@
             {
                 this.isLoading = true;
 
-                Task.Run(async () => await ConfigurationService.ESRBRatings(this.configuration.ConfigurationProperties)
+                Task<List<ESRBRatingInfo>>.Run(async () => await ConfigurationService.ESRBRatings(this.configuration.ConfigurationProperties)
                     .ContinueWith(t =>
                        {
                            if (t.IsFaulted)

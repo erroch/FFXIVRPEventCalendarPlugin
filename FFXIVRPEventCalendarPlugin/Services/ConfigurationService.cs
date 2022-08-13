@@ -1,4 +1,4 @@
-﻿namespace FFXIVRPCalendar.Services
+﻿namespace FFXIVRPCalendarPlugin.Services
 {
     using System;
     using System.Collections.Generic;
@@ -8,14 +8,14 @@
     using System.Net.Http;
     using Newtonsoft.Json;
 
-    using FFXIVRPCalendar.Models;
-    using FFXIVRPCalendar.Mock;
+    using FFXIVRPCalendarPlugin.Models;
+    using FFXIVRPCalendarPlugin.Models.Mock;
 
 
     public static class ConfigurationService
     {
-        private static List<EventCategoryInfo> eventCategories;
-        private static List<ESRBRatingInfo> ratings;
+        private static List<EventCategoryInfo>? eventCategories;
+        private static List<ESRBRatingInfo>? ratings;
 
         public static async Task<List<EventCategoryInfo>> EventCategories(ConfigurationProperties configuration)
         {
@@ -27,7 +27,7 @@
                     using (HttpClient httpClient = new())
                     {
                         string response = await httpClient.GetStringAsync(url).ConfigureAwait(false);
-                        List<EventCategoryInfo> results = JsonConvert.DeserializeObject<List<EventCategoryInfo>>(response);
+                        List<EventCategoryInfo>? results = JsonConvert.DeserializeObject<List<EventCategoryInfo>>(response);
                         if (results == null)
                         {
                             eventCategories = new List<EventCategoryInfo>();
@@ -58,7 +58,7 @@
                     using (HttpClient httpClient = new())
                     {
                         string response = await httpClient.GetStringAsync(url).ConfigureAwait(false);
-                        List<ESRBRatingInfo> results = JsonConvert.DeserializeObject<List<ESRBRatingInfo>>(response);
+                        List<ESRBRatingInfo>? results = JsonConvert.DeserializeObject<List<ESRBRatingInfo>>(response);
                         if (results == null)
                         {
                             ratings = new List<ESRBRatingInfo>();

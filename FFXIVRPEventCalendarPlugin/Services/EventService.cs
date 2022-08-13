@@ -1,4 +1,4 @@
-﻿namespace FFXIVRPCalendar.Services
+﻿namespace FFXIVRPCalendarPlugin.Services
 {
     using System;
     using System.Collections.Generic;
@@ -8,8 +8,8 @@
     using System.Net.Http;
     using Newtonsoft.Json;
 
-    using FFXIVRPCalendar.Models;
-    using FFXIVRPCalendar.Mock;
+    using FFXIVRPCalendarPlugin.Models;
+    using FFXIVRPCalendarPlugin.Models.Mock;
 
     public static class EventService
     {
@@ -43,8 +43,11 @@
                 using (HttpClient httpClient = new())
                 {
                     string response = await httpClient.GetStringAsync(hostURL.Replace('\0', ' ').Trim() + API_PATH).ConfigureAwait(false);
-                    List<RPEvent> results = JsonConvert.DeserializeObject<List<RPEvent>>(response);
-                    rpEvents.AddRange(results.OrderBy(x => x.StartTimeUTC));
+                    List<RPEvent>? results = JsonConvert.DeserializeObject<List<RPEvent>>(response);
+                    if (results != null)
+                    {
+                        rpEvents.AddRange(results.OrderBy(x => x.StartTimeUTC));
+                    }
                 }
             }
             catch (Exception ex)

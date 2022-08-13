@@ -6,7 +6,7 @@
     <Version>0.0.0.1</Version>
     <Description>A sample plugin.</Description>
     <Copyright></Copyright>
-    <PackageProjectUrl>https://github.com/goatcorp/SamplePlugin</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/erroch/FFXIVRPEventCalendarPlugin</PackageProjectUrl>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -17,7 +17,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>$(AppData)\XIVLauncher\devPlugins\SamplePlugin\</OutputPath>
+    <OutputPath>$(AppData)\XIVLauncher\devPlugins\FFXIVRPCalendarPlugin\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,7 +33,6 @@
 
   <ItemGroup>
     <PackageReference Include="DalamudPackager" Version="2.1.2" />
-    <ProjectReference Include="..\FFXIVRPCalendar\FFXIVRPCalendar.csproj" />
     <Reference Include="FFXIVClientStructs">
       <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
       <Private>false</Private>
@@ -62,10 +61,6 @@
       <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
       <Private>false</Private>
     </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\" />
   </ItemGroup>
 
   <ItemGroup>

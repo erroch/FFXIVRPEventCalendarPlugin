@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace FFXIVRPCalendar.Models
+namespace FFXIVRPCalendarPlugin.Models
 {
     /// <summary>
     /// Represents one of FFXIV's servers.
@@ -14,17 +14,17 @@ namespace FFXIVRPCalendar.Models
         /// <summary>
         /// Gets or sets the Server name.
         /// </summary>
-        public string ServerName { get; set; }
+        public string? ServerName { get; set; }
 
         /// <summary>
         /// Gets or sets the Datacenter Name.
         /// </summary>
-        public string DataCenterName { get; set; }
+        public string? DataCenterName { get; set; }
 
         /// <summary>
         /// Gets or sets the physical datacenter region name.
         /// </summary>
-        public string RegionName { get; set;  }
+        public string? RegionName { get; set;  }
 
         /// <summary>
         /// Gets or sets the FFXIV Internal Server Id.
