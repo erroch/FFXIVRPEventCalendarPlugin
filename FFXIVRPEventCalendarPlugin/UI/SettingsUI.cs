@@ -79,35 +79,6 @@ namespace FFXIVRPCalendarPlugin.UI
                 ref this.visible,
                 ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollWithMouse))
             {
-                if (ImGui.BeginCombo("Range", this.configuration.ConfigurationProperties.EventDisplayRange.GetDescription(), ImGuiComboFlags.None))
-                {
-                    if (ImGui.Selectable("Everywhere"))
-                    {
-                        this.configuration.ConfigurationProperties.EventDisplayRange = EventDisplayRange.Everywhere;
-                        this.configuration.Save();
-                    }
-
-                    if (ImGui.Selectable("Physical Datacenter"))
-                    {
-                        this.configuration.ConfigurationProperties.EventDisplayRange = EventDisplayRange.PhysicalDatacenter;
-                        this.configuration.Save();
-                    }
-
-                    if (ImGui.Selectable("Local Datacenter"))
-                    {
-                        this.configuration.ConfigurationProperties.EventDisplayRange = EventDisplayRange.LocalDatacenter;
-                        this.configuration.Save();
-                    }
-
-                    if (ImGui.Selectable("Current Server"))
-                    {
-                        this.configuration.ConfigurationProperties.EventDisplayRange = EventDisplayRange.LocalServer;
-                        this.configuration.Save();
-                    }
-
-                    ImGui.EndCombo();
-                }
-
                 // can't ref a property, so use a local copy
                 bool useLocalTime = this.configuration.UseLocalTimeZone;
 

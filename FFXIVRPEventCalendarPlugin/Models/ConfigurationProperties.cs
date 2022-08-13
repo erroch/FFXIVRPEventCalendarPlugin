@@ -38,11 +38,5 @@ namespace FFXIVRPCalendarPlugin.Models
         /// Gets or sets a listing of categories to filter the event lists with.
         /// </summary>
         public List<string>? Categories { get; set; } = null;
-
-        /// <summary>
-        /// Gets or sets a flag indicating the rage of events to display.
-        /// </summary>
-        [Obsolete("To be removed.")]
-        public EventDisplayRange EventDisplayRange { get; set; } = EventDisplayRange.Everywhere;
     }
 }
