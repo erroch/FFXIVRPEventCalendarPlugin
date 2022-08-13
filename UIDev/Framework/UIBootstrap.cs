@@ -1,4 +1,10 @@
-﻿using ImGuiNET;
+﻿//-----------------------------------------------------------------------
+// <copyright file="UIBootstrap.cs" company="FFXIV RP Event Calendar">
+//     Copyright (c) FFXIV RP Event Calendar. All rights reserved.
+// </copyright>
+//-----------------------------------------------------------------------
+
+using ImGuiNET;
 using ImGuiScene;
 using System.Numerics;
 using System.Runtime.InteropServices;

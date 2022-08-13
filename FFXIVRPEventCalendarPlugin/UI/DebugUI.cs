@@ -1,48 +1,57 @@
-﻿namespace FFXIVRPCalendarPlugin.UI
+﻿//-----------------------------------------------------------------------
+// <copyright file="DebugUI.cs" company="FFXIV RP Event Calendar">
+//     Copyright (c) FFXIV RP Event Calendar. All rights reserved.
+// </copyright>
+//-----------------------------------------------------------------------
+
+namespace FFXIVRPCalendarPlugin.UI
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Numerics;
-    using System.Threading.Tasks;
-
-    using ImGuiNET;
-
-    using Dalamud.Game.Gui;
-    using Dalamud.Game.ClientState;
-    using Dalamud.Game.ClientState.Objects.SubKinds;
-
-    using Lumina.Excel;
-    using Lumina.Excel.GeneratedSheets;
 
     using FFXIVRPCalendarPlugin;
     using FFXIVRPCalendarPlugin.Models;
     using FFXIVRPCalendarPlugin.Services;
-    // using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 
+    using ImGuiNET;
+
+    using Lumina.Excel;
+    using Lumina.Excel.GeneratedSheets;
+
+    /// <summary>
+    /// The RP Calendar debugging UI.
+    /// </summary>
     public class DebugUI : IDisposable
     {
         private bool disposedValue;
-        private readonly Configuration configuration;
-        
 
         // this extra bool exists for ImGui, since you can't ref a property
         private bool visible = false;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DebugUI"/> class.
+        /// </summary>
+        public DebugUI()
+        {
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the Debug UI is visible.
+        /// </summary>
         public bool Visible
         {
-            get { return visible; }
-            set { visible = value; }
+            get { return this.visible; }
+            set { this.visible = value; }
         }
 
-        // passing in the image here just for simplicity
-        public DebugUI(Configuration configuration)
-        {
-            this.configuration = configuration;
-        }
-
+        /// <summary>
+        /// Draw the Debug UI.
+        /// </summary>
         public void Draw()
         {
-            if (!visible)
+            if (!this.visible)
             {
                 return;
             }
@@ -50,7 +59,9 @@
             ImGui.SetNextWindowSize(new Vector2(1200, 540), ImGuiCond.Always);
             try
             {
-                if (ImGui.Begin("FFXIV RP Event Calendar Settings", ref visible,
+                if (ImGui.Begin(
+                    "FFXIV RP Event Calendar Settings",
+                    ref this.visible,
                     ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollWithMouse))
                 {
                     ImGui.Text("Debug Info:");
@@ -64,9 +75,8 @@
                             ImGui.Text($"Current Server Id: {gameWorld.RowId}");
                             ImGui.Text($"Current Datacenter: {gameWorld.DataCenter.Value}");
 
-
-                            ExcelSheet<World>? worldSheet = Plugin.Data.GetExcelSheet<World>();
-                            ExcelSheet<WorldDCGroupType>? dataCentgerSheet = Plugin.Data.GetExcelSheet<WorldDCGroupType>();
+                            ExcelSheet<World>? worldSheet = Plugin.DataManager.GetExcelSheet<World>();
+                            ExcelSheet<WorldDCGroupType>? dataCentgerSheet = Plugin.DataManager.GetExcelSheet<WorldDCGroupType>();
 
                             if (worldSheet != null && dataCentgerSheet != null)
                             {
@@ -89,12 +99,10 @@
 
                                 ImGui.Text("Server List");
                                 ImGui.Spacing();
-                                if (ImGui.BeginTable("##ServerList", 4, 
-                                    ImGuiTableFlags.SizingStretchProp | 
-                                    ImGuiTableFlags.Resizable | 
-                                    ImGuiTableFlags.BordersInnerV | 
-                                    ImGuiTableFlags.ScrollY |
-                                    ImGuiTableFlags.RowBg))
+                                if (ImGui.BeginTable(
+                                    "##ServerList",
+                                    4,
+                                    ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.Resizable | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.ScrollY | ImGuiTableFlags.RowBg))
                                 {
                                     ImGui.TableSetupColumn("##Region");
                                     ImGui.TableSetupColumn("##DataCenter");
@@ -120,6 +128,7 @@
                                             ImGui.Text($"{currentWorld.RowId}");
                                         }
                                     }
+
                                     ImGui.EndTable();
                                 }
                             }
@@ -135,16 +144,30 @@
             ImGui.End();
         }
 
+        /// <summary>
+        /// Dispose of the <see cref="DebugUI"/> class.
+        /// </summary>
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            this.Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Dispose of the <see cref="DebugUI"/> class.
+        /// </summary>
+        /// <param name="disposing">A value indicating whether the Dispose call has been called directly instead of from the finalizer.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!this.disposedValue)
             {
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects)
                 }
 
-                disposedValue = true;
+                this.disposedValue = true;
             }
         }
 
@@ -154,12 +177,5 @@
         //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         //     Dispose(disposing: false);
         // }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
     }
 }

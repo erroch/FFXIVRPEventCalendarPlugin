@@ -1,17 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿//-----------------------------------------------------------------------
+// <copyright file="CalendarMockData.cs" company="FFXIV RP Event Calendar">
+//     Copyright (c) FFXIV RP Event Calendar. All rights reserved.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace FFXIVRPCalendarPlugin.Models.Mock
 {
+    /// <summary>
+    /// Mock data for the FFXIV RP Event Calendar to simulate API results.
+    /// </summary>
     public static class CalendarMockData
     {
+        /// <summary>
+        /// Get string containig test event information.
+        /// </summary>
+        /// <returns>A JSON formatted string contianing information about two roleplay events.</returns>
         public static string GetEventInfoMock()
-        { 
-        
-
+        {
             return @"[
   {
     ""datacenter"": ""Crystal"",

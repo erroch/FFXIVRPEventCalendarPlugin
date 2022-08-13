@@ -1,4 +1,10 @@
-﻿namespace FFXIVRPCalendarPlugin.Models
+﻿//-----------------------------------------------------------------------
+// <copyright file="EventDisplayRange.cs" company="FFXIV RP Event Calendar">
+//     Copyright (c) FFXIV RP Event Calendar. All rights reserved.
+// </copyright>
+//-----------------------------------------------------------------------
+
+namespace FFXIVRPCalendarPlugin.Models
 {
     using System.ComponentModel;
 

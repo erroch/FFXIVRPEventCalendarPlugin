@@ -1,4 +1,10 @@
-﻿namespace FFXIVRPCalendarPlugin.Services
+﻿//-----------------------------------------------------------------------
+// <copyright file="EventsService.cs" company="FFXIV RP Event Calendar">
+//     Copyright (c) FFXIV RP Event Calendar. All rights reserved.
+// </copyright>
+//-----------------------------------------------------------------------
+
+namespace FFXIVRPCalendarPlugin.Services
 {
     using System;
     using System.Collections.Generic;
@@ -6,59 +12,77 @@
     using System.Numerics;
     using System.Threading.Tasks;
 
-    using ImGuiNET;
-    using Dalamud.Game.Gui;
-    using Dalamud.Game.ClientState;
-    using Dalamud.IoC;
-
     using FFXIVRPCalendarPlugin;
     using FFXIVRPCalendarPlugin.Models;
-    using FFXIVRPCalendarPlugin.Services;
     using Lumina.Excel.GeneratedSheets;
 
+    /// <summary>
+    /// A service handing event list building and filtering.
+    /// </summary>
     public class EventsService : IDisposable
     {
+        private const uint REFRESHINTERVAL = 15 * 60;
+
+        private readonly Configuration configuration;
+
         private uint? lastServerId;
         private DateTime? lastRefresh;
-        public DateTime? LastRefreshLocalTime;
+        private bool eventsLoaded = false;
+        private bool disposedValue;
 
-        private const uint REFRESH_INTERVAL = 15 * 60;
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventsService"/> class.
+        /// </summary>
+        /// <param name="configuration">The plugin configuration.</param>
         public EventsService(Configuration configuration)
         {
             this.configuration = configuration;
-            Plugin.ClientState.TerritoryChanged += OnTerritoryChanged;
+            Plugin.ClientState.TerritoryChanged += this.OnTerritoryChanged;
         }
 
-        private void OnTerritoryChanged(object? sender, ushort args)
+        /// <summary>
+        /// Finalizes an instance of the <see cref="EventsService"/> class.
+        /// </summary>
+        ~EventsService()
         {
-            if (Plugin.ClientState.LocalPlayer?.CurrentWorld?.Id != this.lastServerId)
-            {
-                this.FilteredEvents = null;
-                this.FilterEvents();
-                this.lastServerId = Plugin.ClientState.LocalPlayer?.CurrentWorld?.Id;
-            }
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            this.Dispose(disposing: false);
         }
 
-        public List<RPEvent>? RoleplayEvents { get; set; }
+        /// <summary>
+        /// Gets the user local time for the last time the calendar cache was updated.
+        /// </summary>
+        public DateTime? LastRefreshLocalTime { get; internal set; }
+
+        /// <summary>
+        /// Gets the filtered list of roleplay events for the current server.
+        /// </summary>
+        public List<RPEvent>? ServerEvents { get; internal set; }
+
+        /// <summary>
+        /// Gets the filtered list of roleplay events for the current datacenter.
+        /// </summary>
+        public List<RPEvent>? DatacenterEvents { get; internal set; }
+
+        /// <summary>
+        /// Gets the filtered list of roleplay events for the current physical region.
+        /// </summary>
+        public List<RPEvent>? RegionEvents { get; internal set; }
+
+        private List<RPEvent>? RoleplayEvents { get; set; }
+
         private List<RPEvent>? FilteredEvents { get; set; }
 
-        public List<RPEvent>? ServerEvents { get; set; }
-
-        public List<RPEvent>? DatacenterEvents { get; set;  }
-
-        public List<RPEvent>? RegionEvents { get; set; }
-
-        private bool eventsLoaded = false;
-        private bool disposedValue;
-        private readonly Configuration configuration;
-
+        /// <summary>
+        /// Refresh the event list.
+        /// </summary>
+        /// <param name="forceRefresh">A flag indicating if the cache values should be ignored and a refresh done even if within the normal timeout interfval.</param>
         public void RefreshEvents(bool forceRefresh = false)
         {
-            if (lastRefresh.HasValue)
+            if (this.lastRefresh.HasValue)
             {
-                TimeSpan sinceLastRefresh = DateTime.UtcNow - lastRefresh.Value;
-                if (sinceLastRefresh.TotalSeconds >= REFRESH_INTERVAL)
+                TimeSpan sinceLastRefresh = DateTime.UtcNow - this.lastRefresh.Value;
+                if (sinceLastRefresh.TotalSeconds >= REFRESHINTERVAL)
                 {
                     forceRefresh = true;
                 }
@@ -68,11 +92,11 @@
             {
                 this.eventsLoaded = true;
                 this.lastRefresh = DateTime.UtcNow;
-                this.LastRefreshLocalTime = TimeZoneInfo.ConvertTimeFromUtc(this.lastRefresh.Value, configuration.ConfigurationProperties.TimeZoneInfo);
+                this.LastRefreshLocalTime = TimeZoneInfo.ConvertTimeFromUtc(this.lastRefresh.Value, this.configuration.ConfigurationProperties.TimeZoneInfo);
 
                 try
                 {
-                    Task<List<RPEvent>?>.Run(async () => await EventService.GetToday(this.configuration.ConfigurationProperties)
+                    Task<List<RPEvent>?>.Run(async () => await CalendarService.GetToday(this.configuration.ConfigurationProperties)
                         .ContinueWith(
                             t =>
                             {
@@ -87,6 +111,7 @@
                                     {
                                         Plugin.ChatGui.PrintError("error fetching events.");
                                     }
+
                                     this.RoleplayEvents = null;
                                 }
                                 else
@@ -94,9 +119,7 @@
                                     this.RoleplayEvents = t.Result;
                                     this.FilterEvents();
                                 }
-                            }
-                        )
-                    );
+                            }));
                 }
                 catch (Exception ex)
                 {
@@ -105,38 +128,40 @@
             }
             else
             {
-                if (CheckForServerChange())
+                if (this.CheckForServerChange())
                 {
                     this.FilterEvents();
                 }
             }
         }
 
+        /// <summary>
+        /// Updates the filtered events lists based on configuration options.
+        /// </summary>
         public void FilterEvents()
         {
             if (this.RoleplayEvents != null)
             {
-                DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, configuration.ConfigurationProperties.TimeZoneInfo);
-                DateTime startUTC = TimeZoneInfo.ConvertTimeToUtc(nowLocal.Date, configuration.ConfigurationProperties.TimeZoneInfo);
-                DateTime endUTC = TimeZoneInfo.ConvertTimeToUtc(nowLocal.Date.AddDays(1), configuration.ConfigurationProperties.TimeZoneInfo);
+                DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, this.configuration.ConfigurationProperties.TimeZoneInfo);
+                DateTime startUTC = TimeZoneInfo.ConvertTimeToUtc(nowLocal.Date, this.configuration.ConfigurationProperties.TimeZoneInfo);
+                DateTime endUTC = TimeZoneInfo.ConvertTimeToUtc(nowLocal.Date.AddDays(1), this.configuration.ConfigurationProperties.TimeZoneInfo);
 
                 this.FilteredEvents = this.RoleplayEvents
                     .Where(x =>
-                        (configuration.ConfigurationProperties.Categories is null || configuration.ConfigurationProperties.Categories.Contains(x.EventCategory)) &&
-                        (configuration.ConfigurationProperties.Ratings is null || configuration.ConfigurationProperties.Ratings.Contains(x.ESRBRating)) &&
+                        (this.configuration.ConfigurationProperties.Categories is null || this.configuration.ConfigurationProperties.Categories.Contains(x.EventCategory)) &&
+                        (this.configuration.ConfigurationProperties.Ratings is null || this.configuration.ConfigurationProperties.Ratings.Contains(x.ESRBRating)) &&
                         x.StartTimeUTC >= startUTC &&
-                        x.StartTimeUTC <= endUTC
-                    )
+                        x.StartTimeUTC <= endUTC)
                     .Select(x =>
                     {
                         RPEvent result = x;
-                        result.LocalStartTime = TimeZoneInfo.ConvertTimeFromUtc(result.StartTimeUTC, configuration.ConfigurationProperties.TimeZoneInfo);
-                        result.LocalEndTime = TimeZoneInfo.ConvertTimeFromUtc(result.EndTimeUTC, configuration.ConfigurationProperties.TimeZoneInfo);
+                        result.LocalStartTime = TimeZoneInfo.ConvertTimeFromUtc(result.StartTimeUTC, this.configuration.ConfigurationProperties.TimeZoneInfo);
+                        result.LocalEndTime = TimeZoneInfo.ConvertTimeFromUtc(result.EndTimeUTC, this.configuration.ConfigurationProperties.TimeZoneInfo);
                         return x;
                     })
                 .ToList();
 
-                World ? gameWorld = Plugin.ClientState?.LocalPlayer?.CurrentWorld?.GameData;
+                World? gameWorld = Plugin.ClientState?.LocalPlayer?.CurrentWorld?.GameData;
                 if (gameWorld == null)
                 {
                     this.ServerEvents = null;
@@ -168,6 +193,43 @@
             }
         }
 
+        /// <summary>
+        /// Dispose of the <see cref="EventsService"/> class.
+        /// </summary>
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            this.Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Dispose of the <see cref="EventsService"/> class.
+        /// </summary>
+        /// <param name="disposing">A value indicating whether the Dispose call has been called directly instead of from the finalizer.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposedValue)
+            {
+                if (disposing)
+                {
+                    Plugin.ClientState.TerritoryChanged -= this.OnTerritoryChanged;
+                }
+
+                this.disposedValue = true;
+            }
+        }
+
+        private void OnTerritoryChanged(object? sender, ushort args)
+        {
+            if (Plugin.ClientState.LocalPlayer?.CurrentWorld?.Id != this.lastServerId)
+            {
+                this.FilteredEvents = null;
+                this.FilterEvents();
+                this.lastServerId = Plugin.ClientState.LocalPlayer?.CurrentWorld?.Id;
+            }
+        }
+
         private bool CheckForServerChange()
         {
             if (Plugin.ClientState.LocalPlayer?.CurrentWorld?.Id != this.lastServerId)
@@ -175,36 +237,8 @@
                 this.lastServerId = Plugin.ClientState.LocalPlayer?.CurrentWorld?.Id;
                 return true;
             }
+
             return false;
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    Plugin.ClientState.TerritoryChanged -= OnTerritoryChanged;
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
-                disposedValue = true;
-            }
-        }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~EventsService()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

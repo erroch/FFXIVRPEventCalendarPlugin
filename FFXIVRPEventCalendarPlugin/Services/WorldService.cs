@@ -1,14 +1,18 @@
-﻿namespace FFXIVRPCalendarPlugin.Services
+﻿//-----------------------------------------------------------------------
+// <copyright file="WorldService.cs" company="FFXIV RP Event Calendar">
+//     Copyright (c) FFXIV RP Event Calendar. All rights reserved.
+// </copyright>
+//-----------------------------------------------------------------------
+
+namespace FFXIVRPCalendarPlugin.Services
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Lumina.Excel;
-    using Lumina.Excel.GeneratedSheets;
 
     using FFXIVRPCalendarPlugin;
+    using Lumina.Excel;
+    using Lumina.Excel.GeneratedSheets;
 
     /// <summary>
     /// Provides world and data center information.
@@ -18,18 +22,25 @@
         private static IDictionary<uint, World>? worldDictionary;
         private static IDictionary<uint, WorldDCGroupType>? datacenterDictionary;
 
+        /// <summary>
+        /// Gets a dictionary of World information.
+        /// </summary>
         public static IDictionary<uint, World>? Worlds
         {
-            get 
-            { 
+            get
+            {
                 if (worldDictionary == null)
                 {
                     worldDictionary = BuildWorldDictionary();
                 }
-                return worldDictionary; 
+
+                return worldDictionary;
             }
         }
 
+        /// <summary>
+        /// Gets a list of World infromation.
+        /// </summary>
         public static List<World> WorldList
         {
             get
@@ -38,12 +49,14 @@
                 {
                     return new List<World>();
                 }
-                else
 
                 return Worlds.Values.Where(x => x.IsPublic).ToList();
             }
         }
 
+        /// <summary>
+        /// Gets a dictionary of Datacenter information.
+        /// </summary>
         public static IDictionary<uint, WorldDCGroupType>? Datacenters
         {
             get
@@ -52,10 +65,16 @@
                 {
                     datacenterDictionary = BuildDataCenterDictionary();
                 }
+
                 return datacenterDictionary;
             }
         }
 
+        /// <summary>
+        /// Gets an array of world (server) identifiers for a given datacenter.
+        /// </summary>
+        /// <param name="datacenterId">The datacenter identifier.</param>
+        /// <returns>An array of world identificers for the provided datacenter.</returns>
         public static uint[] GetDatacenterWorldIds(uint datacenterId)
         {
             if (Worlds != null)
@@ -70,6 +89,11 @@
             }
         }
 
+        /// <summary>
+        /// Gets an array of datacenter identifiers for a given phsyical datacenter region.
+        /// </summary>
+        /// <param name="regionId">The region identifier.</param>
+        /// <returns>An array of datacenter identifiers for the provided region.</returns>
         public static uint[] GetRegionDatacenterIds(byte regionId)
         {
             if (Datacenters != null)
@@ -84,6 +108,11 @@
             }
         }
 
+        /// <summary>
+        /// Gets an array of world identifiers for a given physical datacenter region.
+        /// </summary>
+        /// <param name="regionId">The region identifier.</param>
+        /// <returns>An array of world identifiers for the privded datacenter region.</returns>
         public static uint[] GetRegionWorldIds(byte regionId)
         {
             uint[] datacenterIds = GetRegionDatacenterIds(regionId);
@@ -102,7 +131,7 @@
 
         private static IDictionary<uint, World>? BuildWorldDictionary()
         {
-            ExcelSheet<World>? worldSheet = Plugin.Data.GetExcelSheet<World>();
+            ExcelSheet<World>? worldSheet = Plugin.DataManager.GetExcelSheet<World>();
             if (worldSheet == null)
             {
                 return null;
@@ -115,7 +144,7 @@
 
         private static IDictionary<uint, WorldDCGroupType>? BuildDataCenterDictionary()
         {
-            ExcelSheet<WorldDCGroupType>? dataCenterSheet = Plugin.Data.GetExcelSheet<WorldDCGroupType>();
+            ExcelSheet<WorldDCGroupType>? dataCenterSheet = Plugin.DataManager.GetExcelSheet<WorldDCGroupType>();
 
             if (dataCenterSheet == null)
             {
