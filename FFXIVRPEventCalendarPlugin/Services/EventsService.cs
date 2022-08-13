@@ -11,9 +11,9 @@
     using Dalamud.Game.ClientState;
     using Dalamud.IoC;
 
-    using FFXIVRPCalendar.Services;
-    using FFXIVRPCalendar.Models;
     using FFXIVRPCalendarPlugin;
+    using FFXIVRPCalendarPlugin.Models;
+    using FFXIVRPCalendarPlugin.Services;
     using Lumina.Excel.GeneratedSheets;
 
     public class EventsService : IDisposable
@@ -72,7 +72,7 @@
 
                 try
                 {
-                    Task.Run(async () => await EventService.GetToday(this.configuration.ConfigurationProperties)
+                    Task<List<RPEvent>?>.Run(async () => await EventService.GetToday(this.configuration.ConfigurationProperties)
                         .ContinueWith(
                             t =>
                             {

@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace FFXIVRPCalendar.Models
+namespace FFXIVRPCalendarPlugin.Models
 {
     /// <summary>
     /// Represents an event category.
@@ -14,12 +14,12 @@ namespace FFXIVRPCalendar.Models
         /// <summary>
         /// Gets or sets the event category name.
         /// </summary>
-        public string CategoryName { get; set; }
+        public string? CategoryName { get; set; }
 
         /// <summary>
         /// Gets or sets the verbose description of the event category.
         /// </summary>
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         /// <summary>
         /// Gets or sets the sort order of the event category.

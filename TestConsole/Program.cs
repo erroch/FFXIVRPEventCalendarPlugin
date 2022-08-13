@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using FFXIVRPCalendar.Models;
-using FFXIVRPCalendar.Services;
+using FFXIVRPCalendarPlugin.Models;
+using FFXIVRPCalendarPlugin.Services;
 
 namespace TestConsole
 {

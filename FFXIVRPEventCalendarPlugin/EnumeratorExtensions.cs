@@ -1,5 +1,6 @@
-﻿namespace FFXIVRPCalendar
+﻿namespace FFXIVRPCalendarPlugin
 {
+    using System;
     using System.ComponentModel;
     using System.Linq;
     using System.Reflection;
@@ -17,6 +18,11 @@
         /// <returns>The enumeration description.</returns>
         public static string GetDescription<T>(this T source)
         {
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source), "Source must not be null.");
+            }
+
             if (!source.GetType().IsEnum)
             {
                 throw new InvalidEnumArgumentException($"The type of {nameof(source)} is not enumerator.");
@@ -24,15 +30,15 @@
 
             var description =
                 source
-                    .GetType()
-                    .GetMember(source.ToString())
+                    .GetType()?
+                    .GetMember(source.ToString() ?? String.Empty)
                     .FirstOrDefault(m => m.DeclaringType == source.GetType())
                     ?.GetCustomAttribute<DescriptionAttribute>()
                     ?.Description;
 
             if (description == null)
             {
-                return source.ToString();
+                return source.ToString() ?? String.Empty;
             }
 
             return description;

@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace FFXIVRPCalendar.Models
+namespace FFXIVRPCalendarPlugin.Models
 {
     using System;
 
@@ -16,12 +16,12 @@ namespace FFXIVRPCalendar.Models
         /// <summary>
         /// Gets or sets the Data Center name.
         /// </summary>
-        public string Datacenter { get; set; }
+        public string? Datacenter { get; set; }
 
         /// <summary>
         /// Gets or sets the Server name.
         /// </summary>
-        public string Server { get; set; }
+        public string? Server { get; set; }
 
         /// <summary>
         /// Gets or sets the Server Identifier.
@@ -31,22 +31,22 @@ namespace FFXIVRPCalendar.Models
         /// <summary>
         /// Gets or sets the Calendar Event Identifier.
         /// </summary>
-        public string UId { get; set; }
+        public string? UId { get; set; }
 
         /// <summary>
         /// Gets or sets the Event Name.
         /// </summary>
-        public string EventName { get; set; }
+        public string? EventName { get; set; }
 
         /// <summary>
         /// Gets or sets the Location.
         /// </summary>
-        public string Location { get; set; }
+        public string? Location { get; set; }
 
         /// <summary>
         /// Gets or sets the Event URL.
         /// </summary>
-        public string EventURL { get; set; }
+        public string? EventURL { get; set; }
 
         /// <summary>
         /// Gets or sets the ESRB Rating Name.
@@ -56,7 +56,7 @@ namespace FFXIVRPCalendar.Models
         /// <summary>
         /// Gets or sets the Event Description.
         /// </summary>
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         /// <summary>
         /// Gets or sets the Event Category Name.

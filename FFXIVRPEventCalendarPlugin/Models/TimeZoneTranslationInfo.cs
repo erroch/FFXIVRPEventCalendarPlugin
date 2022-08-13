@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace FFXIVRPCalendar.Models
+namespace FFXIVRPCalendarPlugin.Models
 {
     /// <summary>
     /// Represents a translation between a TimeZoneInfo name and an IANA name.
@@ -14,16 +14,16 @@ namespace FFXIVRPCalendar.Models
         /// <summary>
         /// Gets or sets the TimeZoneInfo based common time zone name.
         /// </summary>
-        public string TimeZoneName { get; set; }
+        public string? TimeZoneName { get; set; }
 
         /// <summary>
         /// Gets or sets the IANA standard name for the time zone.
         /// </summary>
-        public string IANAName { get; set; }
+        public string? IANAName { get; set; }
 
         /// <summary>
         /// Gets or sets the TimeZoneInfo.Id identifier.
         /// </summary>
-        public string MicrosoftTZName { get; set; }
+        public string? MicrosoftTZName { get; set; }
     }
 }

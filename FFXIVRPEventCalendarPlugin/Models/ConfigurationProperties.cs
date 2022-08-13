@@ -1,4 +1,4 @@
-﻿namespace FFXIVRPCalendar.Models
+﻿namespace FFXIVRPCalendarPlugin.Models
 {
     using System;
     using System.Collections.Generic;
@@ -15,7 +15,7 @@
 
         public List<string> Ratings { get; set; } = new List<string>(new string[] { "Teen" });
 
-        public List<string> Categories { get; set; } = null;
+        public List<string>? Categories { get; set; } = null;
 
         public bool Initalized { get; set; } = false;
 

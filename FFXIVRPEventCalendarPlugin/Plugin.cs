@@ -13,8 +13,8 @@
     using Dalamud.IoC;
     using Dalamud.Plugin;
 
-    using FFXIVRPCalendar.Services;
-    using FFXIVRPCalendar.Models;
+    using FFXIVRPCalendarPlugin.Services;
+    using FFXIVRPCalendarPlugin.Models;
 
     using FFXIVRPCalendarPlugin.UI;
     using Lumina.Excel;

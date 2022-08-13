@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace FFXIVRPCalendar.Models
+namespace FFXIVRPCalendarPlugin.Models
 {
     /// <summary>
     /// Represents an ESRBRatingInfo.
@@ -14,12 +14,12 @@ namespace FFXIVRPCalendar.Models
         /// <summary>
         /// Gets or sets the rating name.
         /// </summary>
-        public string RatingName { get; set; }
+        public string? RatingName { get; set; }
 
         /// <summary>
         /// Gets or sets the rating description.
         /// </summary>
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         /// <summary>
         /// Gets or sets the sort order.
@@ -29,7 +29,7 @@ namespace FFXIVRPCalendar.Models
         /// <summary>
         /// Gets or sets the string prefix used when listing events of mixed ratings.
         /// </summary>
-        public string Prefix { get; set; }
+        public string? Prefix { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this event requires the user to be age verified.

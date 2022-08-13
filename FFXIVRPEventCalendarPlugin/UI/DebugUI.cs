@@ -15,10 +15,8 @@
     using Lumina.Excel;
     using Lumina.Excel.GeneratedSheets;
 
-    using FFXIVRPCalendar;
-    using FFXIVRPCalendar.Services;
-    using FFXIVRPCalendar.Models;
     using FFXIVRPCalendarPlugin;
+    using FFXIVRPCalendarPlugin.Models;
     using FFXIVRPCalendarPlugin.Services;
     // using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 
