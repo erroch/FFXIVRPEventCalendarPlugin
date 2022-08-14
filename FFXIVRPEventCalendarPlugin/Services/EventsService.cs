@@ -142,16 +142,15 @@ namespace FFXIVRPCalendarPlugin.Services
         {
             if (this.RoleplayEvents != null)
             {
-                DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, this.configuration.ConfigurationProperties.TimeZoneInfo);
-                DateTime startUTC = TimeZoneInfo.ConvertTimeToUtc(nowLocal.Date, this.configuration.ConfigurationProperties.TimeZoneInfo);
-                DateTime endUTC = TimeZoneInfo.ConvertTimeToUtc(nowLocal.Date.AddDays(1), this.configuration.ConfigurationProperties.TimeZoneInfo);
+                DateRange dateRange = this.GetDatesForTimeframe(this.configuration.ConfigurationProperties.EventTimeframe);
 
                 this.FilteredEvents = this.RoleplayEvents
                     .Where(x =>
                         (this.configuration.ConfigurationProperties.Categories is null || this.configuration.ConfigurationProperties.Categories.Contains(x.EventCategory)) &&
                         (this.configuration.ConfigurationProperties.Ratings is null || this.configuration.ConfigurationProperties.Ratings.Contains(x.ESRBRating)) &&
-                        x.StartTimeUTC >= startUTC &&
-                        x.StartTimeUTC <= endUTC)
+                        (
+                            (this.configuration.ConfigurationProperties.EventTimeframe == EventTimeframe.Now && x.StartTimeUTC <= DateTime.UtcNow && x.EndTimeUTC >= DateTime.UtcNow) ||
+                            (x.StartTimeUTC >= dateRange.StartDateUTC && x.StartTimeUTC <= dateRange.EndDateUTC)))
                     .Select(x =>
                     {
                         RPEvent result = x;
@@ -239,6 +238,57 @@ namespace FFXIVRPCalendarPlugin.Services
             }
 
             return false;
+        }
+
+        private DateRange GetDatesForTimeframe(EventTimeframe timeframe)
+        {
+            return timeframe switch
+            {
+                EventTimeframe.Now => new DateRange(DateTime.UtcNow, DateTime.UtcNow),
+                EventTimeframe.NextHours => new DateRange(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)),
+                EventTimeframe.Today => this.GetTodayRange(),
+                EventTimeframe.ThisWeek => this.GetThisWeekRange(),
+                _ => this.GetTodayRange(),
+            };
+        }
+
+        private DateRange GetTodayRange()
+        {
+            DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, this.configuration.ConfigurationProperties.TimeZoneInfo);
+            DateTime startUTC = TimeZoneInfo.ConvertTimeToUtc(nowLocal.Date, this.configuration.ConfigurationProperties.TimeZoneInfo);
+            DateTime endUTC = TimeZoneInfo.ConvertTimeToUtc(nowLocal.Date.AddDays(1), this.configuration.ConfigurationProperties.TimeZoneInfo);
+            return new DateRange(startUTC, endUTC);
+        }
+
+        private DateRange GetThisWeekRange()
+        {
+            DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, this.configuration.ConfigurationProperties.TimeZoneInfo);
+            DateTime startLocal = nowLocal.AddDays((-1 * (int)nowLocal.DayOfWeek) + 1).Date;
+
+            // Our week starts on Monday.
+            if (nowLocal.DayOfWeek == DayOfWeek.Sunday)
+            {
+                startLocal = startLocal.AddDays(-7);
+            }
+
+            DateTime endLocal = startLocal.AddDays(6);
+
+            DateTime startUTC = TimeZoneInfo.ConvertTimeToUtc(startLocal, this.configuration.ConfigurationProperties.TimeZoneInfo);
+            DateTime endUTC = TimeZoneInfo.ConvertTimeToUtc(endLocal.AddDays(1), this.configuration.ConfigurationProperties.TimeZoneInfo);
+            return new DateRange(startUTC, endUTC);
+        }
+
+        private class DateRange
+        {
+            public DateRange(DateTime startDateUTC, DateTime endDateUTC)
+            {
+                this.StartDateUTC = startDateUTC;
+                this.EndDateUTC = endDateUTC;
+            }
+
+            public DateTime StartDateUTC { get; set; }
+
+            public DateTime EndDateUTC { get; set; }
         }
     }
 }

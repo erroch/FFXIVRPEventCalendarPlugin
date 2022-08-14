@@ -118,7 +118,7 @@ namespace FFXIVRPCalendarPlugin.Services
         public static async Task<List<RPEvent>> GetToday(ConfigurationProperties configuration)
         {
             await MaybeUpdateCache(configuration.ApiAddress).ConfigureAwait(false);
-            return RPEvents.Where(x => x.StartTimeUTC.Date >= DateTime.UtcNow.Date && x.StartTimeUTC.Date <= DateTime.UtcNow.Date.AddDays(1)).ToList();
+            return RPEvents;
         }
 
         private static async Task MaybeUpdateCache(string hostURL)
