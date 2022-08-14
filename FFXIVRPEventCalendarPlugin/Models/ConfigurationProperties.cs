@@ -38,5 +38,10 @@ namespace FFXIVRPCalendarPlugin.Models
         /// Gets or sets a listing of categories to filter the event lists with.
         /// </summary>
         public List<string>? Categories { get; set; } = null;
+
+        /// <summary>
+        /// Gets or sets the timeframe of events to display.
+        /// </summary>
+        public EventTimeframe EventTimeframe { get; set; } = EventTimeframe.Today;
     }
 }

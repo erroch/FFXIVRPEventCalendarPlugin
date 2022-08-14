@@ -27,6 +27,10 @@ namespace FFXIVRPCalendarPlugin.UI
     /// </summary>
     public class PluginUI : IDisposable
     {
+        private const float OptionsSize = 122;
+        private const float HeaderSize = 200;
+        private const float FooterSize = 35;
+
         private readonly EventsService eventsService;
         private readonly Configuration configuration;
         private readonly SettingsUI settingsUI;
@@ -176,28 +180,60 @@ namespace FFXIVRPCalendarPlugin.UI
             }
         }
 
-        private static void BuildToolTip(string description)
+        private void BuildEventRangeCombo(EventTimeframe selectedTimeFrame)
         {
-            ImGui.TextDisabled("(?)");
-            if (ImGui.IsItemHovered())
+            const string comboTitle = "Event Range: ";
+
+            float width = (ImGui.CalcTextSize(EventTimeframe.NextHours.GetDescription()).X + ImGui.CalcTextSize(comboTitle).X) * 1.3f;
+            float height = ImGui.GetTextLineHeightWithSpacing() * 1.3f;
+            Vector2 vector2 = new (width, height);
+
+            IEnumerable<EventTimeframe> eventTimeFrames = System.Enum.GetValues(typeof(EventTimeframe))
+                .Cast<EventTimeframe>();
+
+            if (ImGui.BeginChildFrame(1, vector2, ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground))
             {
-                ImGui.BeginTooltip();
-                ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35f);
-                ImGui.TextUnformatted(description);
-                ImGui.PopTextWrapPos();
-                ImGui.EndTooltip();
+                ImGui.Text(comboTitle);
+                ImGui.SameLine();
+
+                // has to be non empty or the entire thing won't show.
+                if (ImGui.BeginCombo(" ", selectedTimeFrame.GetDescription()))
+                {
+                    foreach (EventTimeframe timeFrame in eventTimeFrames)
+                    {
+                        if (ImGui.Selectable(timeFrame.GetDescription(), this.configuration.ConfigurationProperties.EventTimeframe == timeFrame))
+                        {
+                            this.configuration.ConfigurationProperties.EventTimeframe = timeFrame;
+                            this.eventsService.FilterEvents();
+                            this.configuration.Save();
+                        }
+                    }
+
+                    ImGui.EndCombo();
+                }
+
+                ImGui.EndChildFrame();
             }
         }
 
-        private static void BuildEventTable(List<RPEvent>? eventList, string tableId)
+        private void BuildEventTable(List<RPEvent>? eventList, string tableId, bool optionsOpen)
         {
+            this.BuildEventRangeCombo(this.configuration.ConfigurationProperties.EventTimeframe);
+
             if (eventList == null || eventList.Count == 0)
             {
                 ImGui.Text("No events found.");
                 return;
             }
 
-            Vector2 outerSize = new (0, ImGui.GetWindowHeight() - 170 - 35);
+            float tableSize = ImGui.GetWindowHeight() - HeaderSize - FooterSize;
+
+            if (optionsOpen)
+            {
+                tableSize -= OptionsSize;
+            }
+
+            Vector2 outerSize = new (0, tableSize);
             if (ImGui.BeginTable(
                 tableId,
                 6,
@@ -211,7 +247,6 @@ namespace FFXIVRPCalendarPlugin.UI
                 ImGui.TableSetupColumn("URL");
                 ImGui.TableSetupColumn("Category");
                 ImGui.TableHeadersRow();
-
                 foreach (RPEvent myEvent in eventList)
                 {
                     ImGui.TableNextRow();
@@ -258,7 +293,7 @@ namespace FFXIVRPCalendarPlugin.UI
 
                 ImGui.Separator();
 
-                this.BuildOptions();
+                bool optionsOpen = this.BuildOptions();
 
                 ImGui.Text("Event Lists");
 
@@ -268,7 +303,7 @@ namespace FFXIVRPCalendarPlugin.UI
                     {
                         ImGui.Text("Current Server Events");
                         List<RPEvent>? serverEvents = this.eventsService.ServerEvents;
-                        BuildEventTable(serverEvents, "##ServerEvents");
+                        this.BuildEventTable(serverEvents, "##ServerEvents", optionsOpen);
                         ImGui.EndTabItem();
                     }
 
@@ -276,7 +311,7 @@ namespace FFXIVRPCalendarPlugin.UI
                     {
                         ImGui.Text("Current Data Center Events");
                         List<RPEvent>? serverEvents = this.eventsService.DatacenterEvents;
-                        BuildEventTable(serverEvents, "##DatacenterEvents");
+                        this.BuildEventTable(serverEvents, "##DatacenterEvents", optionsOpen);
                         ImGui.EndTabItem();
                     }
 
@@ -284,7 +319,7 @@ namespace FFXIVRPCalendarPlugin.UI
                     {
                         ImGui.Text("Current Region Events");
                         List<RPEvent>? serverEvents = this.eventsService.RegionEvents;
-                        BuildEventTable(serverEvents, "##RegionEvents");
+                        this.BuildEventTable(serverEvents, "##RegionEvents", optionsOpen);
                         ImGui.EndTabItem();
                     }
 
@@ -308,7 +343,7 @@ namespace FFXIVRPCalendarPlugin.UI
             ImGui.End();
         }
 
-        private void BuildOptions()
+        private bool BuildOptions()
         {
             if (ImGui.CollapsingHeader("Options"))
             {
@@ -409,7 +444,7 @@ namespace FFXIVRPCalendarPlugin.UI
                             if (category.Description != null)
                             {
                                 ImGui.SameLine();
-                                BuildToolTip(category.Description);
+                                ImGuiUtilities.BuildToolTip(category.Description);
                             }
 
                             if (itemCount >= 5)
@@ -426,7 +461,11 @@ namespace FFXIVRPCalendarPlugin.UI
                 }
 
                 ImGui.Separator();
+
+                return true;
             }
+
+            return false;
         }
 
         private void LoadConfigureSettings()
