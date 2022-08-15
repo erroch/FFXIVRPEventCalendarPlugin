@@ -12,6 +12,8 @@ namespace FFXIVRPCalendarPlugin.Services
     using System.Numerics;
     using System.Threading.Tasks;
 
+    using Dalamud.Logging;
+
     using FFXIVRPCalendarPlugin;
     using FFXIVRPCalendarPlugin.Models;
     using Lumina.Excel.GeneratedSheets;
@@ -123,6 +125,7 @@ namespace FFXIVRPCalendarPlugin.Services
                 }
                 catch (Exception ex)
                 {
+                    PluginLog.LogError(ex, ex.Message);
                     Plugin.ChatGui.PrintError($"error fetching events: {ex.Message}");
                 }
             }
