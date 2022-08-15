@@ -112,7 +112,7 @@ namespace FFXIVRPCalendarPlugin
             switch (command)
             {
                 case "/resetcalendar":
-                    this.Configuration.ConfigurationProperties = new ConfigurationProperties();
+                    this.Configuration.Reset();
                     this.Configuration.Save();
                     break;
                 case "/events":
