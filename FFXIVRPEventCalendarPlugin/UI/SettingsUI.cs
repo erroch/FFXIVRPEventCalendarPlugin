@@ -90,24 +90,24 @@ namespace FFXIVRPCalendarPlugin.UI
                     this.configuration.Save();
                 }
 
-                byte[] buffer = System.Text.Encoding.ASCII.GetBytes(this.configuration.ConfigurationProperties.TimeZoneInfo.DisplayName.PadRight(255, ' '));
+                byte[] buffer = System.Text.Encoding.ASCII.GetBytes(this.configuration.TimeZoneInfo.DisplayName.PadRight(255, ' '));
                 if (ImGui.InputText("Alternate Timzeone", buffer, 256))
                 {
                     string alternateTimezone = System.Text.Encoding.Default.GetString(buffer);
                     TimeZoneInfo timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(alternateTimezone);
                     if (timeZoneInfo != null)
                     {
-                        this.configuration.ConfigurationProperties.TimeZoneInfo = timeZoneInfo;
+                        this.configuration.TimeZoneInfo = timeZoneInfo;
                     }
 
                     this.configuration.Save();
                 }
 
-                byte[] urlBuffer = System.Text.Encoding.ASCII.GetBytes(this.configuration.ConfigurationProperties.ApiAddress.PadRight(255, ' '));
+                byte[] urlBuffer = System.Text.Encoding.ASCII.GetBytes(this.configuration.ApiAddress.PadRight(255, ' '));
                 if (ImGui.InputText("URL", urlBuffer, 256))
                 {
                     string apiAddress = System.Text.Encoding.Default.GetString(urlBuffer).Replace("\0", string.Empty).Trim();
-                    this.configuration.ConfigurationProperties.ApiAddress = apiAddress.Trim();
+                    this.configuration.ApiAddress = apiAddress.Trim();
                     this.configuration.Save();
                 }
             }

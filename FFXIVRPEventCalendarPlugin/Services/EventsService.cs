@@ -92,11 +92,11 @@ namespace FFXIVRPCalendarPlugin.Services
             {
                 this.eventsLoaded = true;
                 this.lastRefresh = DateTime.UtcNow;
-                this.LastRefreshLocalTime = TimeZoneInfo.ConvertTimeFromUtc(this.lastRefresh.Value, this.configuration.ConfigurationProperties.TimeZoneInfo);
+                this.LastRefreshLocalTime = TimeZoneInfo.ConvertTimeFromUtc(this.lastRefresh.Value, this.configuration.TimeZoneInfo);
 
                 try
                 {
-                    Task<List<RPEvent>?>.Run(async () => await CalendarService.GetToday(this.configuration.ConfigurationProperties)
+                    Task<List<RPEvent>?>.Run(async () => await CalendarService.GetToday(this.configuration)
                         .ContinueWith(
                             t =>
                             {
@@ -142,21 +142,21 @@ namespace FFXIVRPCalendarPlugin.Services
         {
             if (this.RoleplayEvents != null)
             {
-                DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, this.configuration.ConfigurationProperties.TimeZoneInfo);
-                DateTime startUTC = TimeZoneInfo.ConvertTimeToUtc(nowLocal.Date, this.configuration.ConfigurationProperties.TimeZoneInfo);
-                DateTime endUTC = TimeZoneInfo.ConvertTimeToUtc(nowLocal.Date.AddDays(1), this.configuration.ConfigurationProperties.TimeZoneInfo);
+                DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, this.configuration.TimeZoneInfo);
+                DateTime startUTC = TimeZoneInfo.ConvertTimeToUtc(nowLocal.Date, this.configuration.TimeZoneInfo);
+                DateTime endUTC = TimeZoneInfo.ConvertTimeToUtc(nowLocal.Date.AddDays(1), this.configuration.TimeZoneInfo);
 
                 this.FilteredEvents = this.RoleplayEvents
                     .Where(x =>
-                        (this.configuration.ConfigurationProperties.Categories is null || this.configuration.ConfigurationProperties.Categories.Contains(x.EventCategory)) &&
-                        (this.configuration.ConfigurationProperties.Ratings is null || this.configuration.ConfigurationProperties.Ratings.Contains(x.ESRBRating)) &&
+                        (this.configuration.Categories is null || this.configuration.Categories.Contains(x.EventCategory)) &&
+                        (this.configuration.Ratings is null || this.configuration.Ratings.Contains(x.ESRBRating)) &&
                         x.StartTimeUTC >= startUTC &&
                         x.StartTimeUTC <= endUTC)
                     .Select(x =>
                     {
                         RPEvent result = x;
-                        result.LocalStartTime = TimeZoneInfo.ConvertTimeFromUtc(result.StartTimeUTC, this.configuration.ConfigurationProperties.TimeZoneInfo);
-                        result.LocalEndTime = TimeZoneInfo.ConvertTimeFromUtc(result.EndTimeUTC, this.configuration.ConfigurationProperties.TimeZoneInfo);
+                        result.LocalStartTime = TimeZoneInfo.ConvertTimeFromUtc(result.StartTimeUTC, this.configuration.TimeZoneInfo);
+                        result.LocalEndTime = TimeZoneInfo.ConvertTimeFromUtc(result.EndTimeUTC, this.configuration.TimeZoneInfo);
                         return x;
                     })
                 .ToList();

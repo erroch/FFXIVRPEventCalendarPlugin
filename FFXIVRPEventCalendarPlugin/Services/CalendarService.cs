@@ -40,10 +40,10 @@ namespace FFXIVRPCalendarPlugin.Services
         /// <summary>
         /// Gets a list of Event Categories from the API indicated in the system configuration.
         /// </summary>
-        /// <param name="configuration">The <see cref="ConfigurationProperties"/> containing API information.</param>
+        /// <param name="configuration">The <see cref="Configuration "/> containing API information.</param>
         /// <returns>A list of <see cref="EventCategoryInfo"/> for filtering purposes.</returns>
         /// <exception cref="Exception">Will throw an exception if the httpClient call fails.</exception>
-        public static async Task<List<EventCategoryInfo>> EventCategories(ConfigurationProperties configuration)
+        public static async Task<List<EventCategoryInfo>> EventCategories(Configuration configuration)
         {
             if (eventCategories == null)
             {
@@ -76,10 +76,10 @@ namespace FFXIVRPCalendarPlugin.Services
         /// <summary>
         /// Gets a list of ESRB ratings from the API indicated in the system configuration.
         /// </summary>
-        /// <param name="configuration">The <see cref="ConfigurationProperties"/> containing API information.</param>
+        /// <param name="configuration">The <see cref="Configuration "/> containing API information.</param>
         /// <returns>A list of <see cref="ESRBRatingInfo"/> for filtering purposes.</returns>
         /// <exception cref="Exception">Will throw an exception if the httpClient call fails.</exception>
-        public static async Task<List<ESRBRatingInfo>> ESRBRatings(ConfigurationProperties configuration)
+        public static async Task<List<ESRBRatingInfo>> ESRBRatings(Configuration configuration)
         {
             if (ratings == null)
             {
@@ -113,9 +113,9 @@ namespace FFXIVRPCalendarPlugin.Services
         /// <summary>
         /// Gets a listing of RP events for the current week with padding for filtering.
         /// </summary>
-        /// <param name="configuration">The <see cref="ConfigurationProperties"/> containing API information.</param>
+        /// <param name="configuration">The <see cref="Configuration "/> containing API information.</param>
         /// <returns>A list of <see cref="RPEvent"/>. for the current day.</returns>
-        public static async Task<List<RPEvent>> GetToday(ConfigurationProperties configuration)
+        public static async Task<List<RPEvent>> GetToday(Configuration configuration)
         {
             await MaybeUpdateCache(configuration.ApiAddress).ConfigureAwait(false);
             return RPEvents.Where(x => x.StartTimeUTC.Date >= DateTime.UtcNow.Date && x.StartTimeUTC.Date <= DateTime.UtcNow.Date.AddDays(1)).ToList();
