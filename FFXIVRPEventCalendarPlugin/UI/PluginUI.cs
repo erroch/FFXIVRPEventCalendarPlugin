@@ -10,17 +10,15 @@ namespace FFXIVRPCalendarPlugin.UI
     using System.Collections.Generic;
     using System.Linq;
     using System.Numerics;
+    using System.Text;
     using System.Threading.Tasks;
-
-    using Dalamud.Game.ClientState;
-    using Dalamud.Game.Gui;
-    using Dalamud.IoC;
 
     using FFXIVRPCalendarPlugin;
     using FFXIVRPCalendarPlugin.Models;
     using FFXIVRPCalendarPlugin.Services;
 
     using ImGuiNET;
+    using Newtonsoft.Json.Serialization;
 
     /// <summary>
     /// The primary plugin UI.
@@ -31,6 +29,9 @@ namespace FFXIVRPCalendarPlugin.UI
         private const float HeaderSize = 200;
         private const float FooterSize = 35;
 
+        private const string ComboEventRangeTitle = "Event Range: ";
+        private const string TextBoxSearchTitle = "Search: ";
+
         private readonly EventsService eventsService;
         private readonly Configuration configuration;
         private readonly SettingsUI settingsUI;
@@ -38,6 +39,7 @@ namespace FFXIVRPCalendarPlugin.UI
         private bool visible = false;
         private bool isLoading = false;
         private bool disposedValue;
+        private byte[] textBuffer = new byte[64];
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PluginUI"/> class.
@@ -123,9 +125,44 @@ namespace FFXIVRPCalendarPlugin.UI
             }
         }
 
+        /// <summary>
+        /// Gets or sets value of chars array for InputText.
+        /// </summary>
+        private byte[] TextBuffer
+        {
+            get { return this.textBuffer; }
+            set { this.textBuffer = value; }
+        }
+
         private List<EventCategoryInfo>? EventCategories { get; set; }
 
         private List<ESRBRatingInfo>? ESRBRatings { get; set; }
+
+        /// <summary>
+        /// Returns given event list filtered by searchFilter string.
+        /// </summary>
+        /// <param name="events"> Given time frame from configuration.</param>
+        /// <param name="searchFilter"> Given search filter.</param>
+        /// <returns> The given event list filtered by event name.</returns>
+        public static List<RPEvent>? SearchEvents(List<RPEvent>? events, string searchFilter)
+        {
+            List<RPEvent>? rPEvents = new ();
+
+            if (events == null)
+            {
+                return rPEvents;
+            }
+
+            foreach (RPEvent e in events!)
+            {
+                if (e.EventName!.ToLower().IndexOf(searchFilter.ToLower()) != -1)
+                {
+                    rPEvents.Add(e);
+                }
+            }
+
+            return rPEvents;
+        }
 
         /// <summary>
         /// Dispose of the <see cref="PluginUI"/> class.
@@ -180,45 +217,66 @@ namespace FFXIVRPCalendarPlugin.UI
             }
         }
 
-        private void BuildEventRangeCombo(EventTimeframe selectedTimeFrame)
+        private void BuildWidgets()
         {
-            const string comboTitle = "Event Range: ";
-
-            float width = (ImGui.CalcTextSize(EventTimeframe.NextHours.GetDescription()).X + ImGui.CalcTextSize(comboTitle).X) * 1.3f;
-            float height = ImGui.GetTextLineHeightWithSpacing() * 1.3f;
-            Vector2 vector2 = new (width, height);
-
-            IEnumerable<EventTimeframe> eventTimeFrames = System.Enum.GetValues(typeof(EventTimeframe))
-                .Cast<EventTimeframe>();
+            // Build Event Range Combo
+            Vector2 vector2 = ImGuiUtilities.CalcWidgetChildFrameVector2(ImGui.CalcTextSize(EventTimeframe.NextHours.GetDescription()).X, ImGui.CalcTextSize(ComboEventRangeTitle).X);
 
             if (ImGui.BeginChildFrame(1, vector2, ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground))
             {
-                ImGui.Text(comboTitle);
-                ImGui.SameLine();
+                this.BuildEventRangeCombo(this.configuration.ConfigurationProperties.EventTimeframe);
 
-                // has to be non empty or the entire thing won't show.
-                if (ImGui.BeginCombo(" ", selectedTimeFrame.GetDescription()))
-                {
-                    foreach (EventTimeframe timeFrame in eventTimeFrames)
-                    {
-                        if (ImGui.Selectable(timeFrame.GetDescription(), this.configuration.ConfigurationProperties.EventTimeframe == timeFrame))
-                        {
-                            this.configuration.ConfigurationProperties.EventTimeframe = timeFrame;
-                            this.eventsService.FilterEvents();
-                            this.configuration.Save();
-                        }
-                    }
+                ImGui.EndChildFrame();
+            }
 
-                    ImGui.EndCombo();
-                }
+            ImGui.SameLine();
+
+            // Build Search Input Textbox
+            vector2 = ImGuiUtilities.CalcWidgetChildFrameVector2(ImGui.GetWindowWidth() / 4, ImGui.CalcTextSize(ComboEventRangeTitle).X);
+
+            if (ImGui.BeginChildFrame(2, vector2, ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground))
+            {
+                this.BuildEventSearchTextBox();
 
                 ImGui.EndChildFrame();
             }
         }
 
+        private void BuildEventRangeCombo(EventTimeframe selectedTimeFrame)
+        {
+            IEnumerable<EventTimeframe> eventTimeFrames = System.Enum.GetValues(typeof(EventTimeframe)).Cast<EventTimeframe>();
+            ImGui.Text(ComboEventRangeTitle);
+            ImGui.SameLine();
+
+            // has to be non empty or the entire thing won't show.
+            if (ImGui.BeginCombo(" ", selectedTimeFrame.GetDescription()))
+            {
+                foreach (EventTimeframe timeFrame in eventTimeFrames)
+                {
+                    if (ImGui.Selectable(timeFrame.GetDescription(), this.configuration.ConfigurationProperties.EventTimeframe == timeFrame))
+                    {
+                        this.configuration.ConfigurationProperties.EventTimeframe = timeFrame;
+                        this.eventsService.FilterEvents();
+                        this.configuration.Save();
+                    }
+                }
+
+                ImGui.EndCombo();
+            }
+        }
+
+        private void BuildEventSearchTextBox()
+        {
+            uint buf = 64;
+
+            ImGui.Text(TextBoxSearchTitle);
+            ImGui.SameLine();
+            ImGui.InputText(" ", this.TextBuffer, buf, ImGuiInputTextFlags.None);
+        }
+
         private void BuildEventTable(List<RPEvent>? eventList, string tableId, bool optionsOpen)
         {
-            this.BuildEventRangeCombo(this.configuration.ConfigurationProperties.EventTimeframe);
+            this.BuildWidgets();
 
             if (eventList == null || eventList.Count == 0)
             {
@@ -303,6 +361,11 @@ namespace FFXIVRPCalendarPlugin.UI
                     {
                         ImGui.Text("Current Server Events");
                         List<RPEvent>? serverEvents = this.eventsService.ServerEvents;
+                        if (Encoding.Default.GetString(this.TextBuffer) != string.Empty)
+                        {
+                            serverEvents = SearchEvents(serverEvents, Encoding.Default.GetString(this.TextBuffer));
+                        }
+
                         this.BuildEventTable(serverEvents, "##ServerEvents", optionsOpen);
                         ImGui.EndTabItem();
                     }
@@ -311,6 +374,11 @@ namespace FFXIVRPCalendarPlugin.UI
                     {
                         ImGui.Text("Current Data Center Events");
                         List<RPEvent>? serverEvents = this.eventsService.DatacenterEvents;
+                        if (Encoding.Default.GetString(this.TextBuffer) != string.Empty)
+                        {
+                            serverEvents = SearchEvents(serverEvents, Encoding.Default.GetString(this.TextBuffer));
+                        }
+
                         this.BuildEventTable(serverEvents, "##DatacenterEvents", optionsOpen);
                         ImGui.EndTabItem();
                     }
@@ -319,6 +387,11 @@ namespace FFXIVRPCalendarPlugin.UI
                     {
                         ImGui.Text("Current Region Events");
                         List<RPEvent>? serverEvents = this.eventsService.RegionEvents;
+                        if (Encoding.Default.GetString(this.TextBuffer) != string.Empty)
+                        {
+                            serverEvents = SearchEvents(serverEvents, Encoding.Default.GetString(this.TextBuffer));
+                        }
+
                         this.BuildEventTable(serverEvents, "##RegionEvents", optionsOpen);
                         ImGui.EndTabItem();
                     }
