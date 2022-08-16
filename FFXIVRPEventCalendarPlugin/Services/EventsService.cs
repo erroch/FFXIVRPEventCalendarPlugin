@@ -95,11 +95,11 @@ namespace FFXIVRPCalendarPlugin.Services
             {
                 this.eventsLoaded = true;
                 this.lastRefresh = DateTime.UtcNow;
-                this.LastRefreshLocalTime = TimeZoneInfo.ConvertTimeFromUtc(this.lastRefresh.Value, this.configuration.ConfigurationProperties.TimeZoneInfo);
+                this.LastRefreshLocalTime = TimeZoneInfo.ConvertTimeFromUtc(this.lastRefresh.Value, this.configuration.TimeZoneInfo);
 
                 try
                 {
-                    Task<List<RPEvent>?>.Run(async () => await CalendarService.GetToday(this.configuration.ConfigurationProperties)
+                    Task<List<RPEvent>?>.Run(async () => await CalendarService.GetToday(this.configuration)
                         .ContinueWith(
                             t =>
                             {
@@ -146,20 +146,20 @@ namespace FFXIVRPCalendarPlugin.Services
         {
             if (this.RoleplayEvents != null)
             {
-                DateRange dateRange = this.GetDatesForTimeframe(this.configuration.ConfigurationProperties.EventTimeframe);
+                DateRange dateRange = this.GetDatesForTimeframe(this.configuration.EventTimeframe);
 
                 this.FilteredEvents = this.RoleplayEvents
                     .Where(x =>
-                        (this.configuration.ConfigurationProperties.Categories is null || this.configuration.ConfigurationProperties.Categories.Contains(x.EventCategory)) &&
-                        (this.configuration.ConfigurationProperties.Ratings is null || this.configuration.ConfigurationProperties.Ratings.Contains(x.ESRBRating)) &&
+                        (this.configuration.Categories is null || this.configuration.Categories.Contains(x.EventCategory)) &&
+                        (this.configuration.Ratings is null || this.configuration.Ratings.Contains(x.ESRBRating)) &&
                         (
-                            (this.configuration.ConfigurationProperties.EventTimeframe == EventTimeframe.Now && x.StartTimeUTC <= DateTime.UtcNow && x.EndTimeUTC >= DateTime.UtcNow) ||
+                            (this.configuration.EventTimeframe == EventTimeframe.Now && x.StartTimeUTC <= DateTime.UtcNow && x.EndTimeUTC >= DateTime.UtcNow) ||
                             (x.StartTimeUTC >= dateRange.StartDateUTC && x.StartTimeUTC <= dateRange.EndDateUTC)))
                     .Select(x =>
                     {
                         RPEvent result = x;
-                        result.LocalStartTime = TimeZoneInfo.ConvertTimeFromUtc(result.StartTimeUTC, this.configuration.ConfigurationProperties.TimeZoneInfo);
-                        result.LocalEndTime = TimeZoneInfo.ConvertTimeFromUtc(result.EndTimeUTC, this.configuration.ConfigurationProperties.TimeZoneInfo);
+                        result.LocalStartTime = TimeZoneInfo.ConvertTimeFromUtc(result.StartTimeUTC, this.configuration.TimeZoneInfo);
+                        result.LocalEndTime = TimeZoneInfo.ConvertTimeFromUtc(result.EndTimeUTC, this.configuration.TimeZoneInfo);
                         return x;
                     })
                 .ToList();
@@ -261,15 +261,15 @@ namespace FFXIVRPCalendarPlugin.Services
 
         private DateRange GetTodayRange()
         {
-            DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, this.configuration.ConfigurationProperties.TimeZoneInfo);
-            DateTime startUTC = TimeZoneInfo.ConvertTimeToUtc(nowLocal.Date, this.configuration.ConfigurationProperties.TimeZoneInfo);
-            DateTime endUTC = TimeZoneInfo.ConvertTimeToUtc(nowLocal.Date.AddDays(1), this.configuration.ConfigurationProperties.TimeZoneInfo);
+            DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, this.configuration.TimeZoneInfo);
+            DateTime startUTC = TimeZoneInfo.ConvertTimeToUtc(nowLocal.Date, this.configuration.TimeZoneInfo);
+            DateTime endUTC = TimeZoneInfo.ConvertTimeToUtc(nowLocal.Date.AddDays(1), this.configuration.TimeZoneInfo);
             return new DateRange(startUTC, endUTC);
         }
 
         private DateRange GetThisWeekRange()
         {
-            DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, this.configuration.ConfigurationProperties.TimeZoneInfo);
+            DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, this.configuration.TimeZoneInfo);
             DateTime startLocal = nowLocal.AddDays((-1 * (int)nowLocal.DayOfWeek) + 1).Date;
 
             // Our week starts on Monday.
@@ -280,8 +280,8 @@ namespace FFXIVRPCalendarPlugin.Services
 
             DateTime endLocal = startLocal.AddDays(6);
 
-            DateTime startUTC = TimeZoneInfo.ConvertTimeToUtc(startLocal, this.configuration.ConfigurationProperties.TimeZoneInfo);
-            DateTime endUTC = TimeZoneInfo.ConvertTimeToUtc(endLocal.AddDays(1), this.configuration.ConfigurationProperties.TimeZoneInfo);
+            DateTime startUTC = TimeZoneInfo.ConvertTimeToUtc(startLocal, this.configuration.TimeZoneInfo);
+            DateTime endUTC = TimeZoneInfo.ConvertTimeToUtc(endLocal.AddDays(1), this.configuration.TimeZoneInfo);
             return new DateRange(startUTC, endUTC);
         }
 

@@ -224,7 +224,7 @@ namespace FFXIVRPCalendarPlugin.UI
 
             if (ImGui.BeginChildFrame(1, vector2, ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground))
             {
-                this.BuildEventRangeCombo(this.configuration.ConfigurationProperties.EventTimeframe);
+                this.BuildEventRangeCombo(this.configuration.EventTimeframe);
 
                 ImGui.EndChildFrame();
             }
@@ -253,9 +253,9 @@ namespace FFXIVRPCalendarPlugin.UI
             {
                 foreach (EventTimeframe timeFrame in eventTimeFrames)
                 {
-                    if (ImGui.Selectable(timeFrame.GetDescription(), this.configuration.ConfigurationProperties.EventTimeframe == timeFrame))
+                    if (ImGui.Selectable(timeFrame.GetDescription(), this.configuration.EventTimeframe == timeFrame))
                     {
-                        this.configuration.ConfigurationProperties.EventTimeframe = timeFrame;
+                        this.configuration.EventTimeframe = timeFrame;
                         this.eventsService.FilterEvents();
                         this.configuration.Save();
                     }
@@ -271,7 +271,7 @@ namespace FFXIVRPCalendarPlugin.UI
 
             ImGui.Text(TextBoxSearchTitle);
             ImGui.SameLine();
-            ImGui.InputText(" ", this.TextBuffer, buf, ImGuiInputTextFlags.None);
+            ImGui.InputText(" ", this.TextBuffer, buf);
         }
 
         private void BuildEventTable(List<RPEvent>? eventList, string tableId, bool optionsOpen)
@@ -344,9 +344,9 @@ namespace FFXIVRPCalendarPlugin.UI
 
                 ImGui.Spacing();
 
-                if (this.configuration.ConfigurationProperties.TimeZoneInfo != TimeZoneInfo.Local)
+                if (this.configuration.TimeZoneInfo != TimeZoneInfo.Local)
                 {
-                    ImGui.Text($"Overriding with Configured Time Zone: {this.configuration.ConfigurationProperties.TimeZoneInfo.DisplayName}");
+                    ImGui.Text($"Overriding with Configured Time Zone: {this.configuration.TimeZoneInfo.DisplayName}");
                 }
 
                 ImGui.Separator();
@@ -427,9 +427,9 @@ namespace FFXIVRPCalendarPlugin.UI
                 }
                 else
                 {
-                    if (this.configuration.ConfigurationProperties.Ratings.Count == 0)
+                    if (this.configuration.Ratings.Count == 0)
                     {
-                        this.configuration.ConfigurationProperties.Ratings = this.ESRBRatings
+                        this.configuration.Ratings = this.ESRBRatings
                             .Where(x => x.RatingName != null)
                             .Select(x => x.RatingName ?? string.Empty)
                             .ToList();
@@ -441,21 +441,21 @@ namespace FFXIVRPCalendarPlugin.UI
                         {
                             if (rating.RatingName != null)
                             {
-                                bool check = this.configuration.ConfigurationProperties.Ratings.Contains(rating.RatingName);
+                                bool check = this.configuration.Ratings.Contains(rating.RatingName);
                                 if (ImGui.Checkbox(rating.RatingName, ref check))
                                 {
                                     if (check)
                                     {
-                                        if (!this.configuration.ConfigurationProperties.Ratings.Contains(rating.RatingName))
+                                        if (!this.configuration.Ratings.Contains(rating.RatingName))
                                         {
-                                            this.configuration.ConfigurationProperties.Ratings.Add(rating.RatingName);
+                                            this.configuration.Ratings.Add(rating.RatingName);
                                         }
                                     }
                                     else
                                     {
-                                        if (this.configuration.ConfigurationProperties.Ratings.Contains(rating.RatingName))
+                                        if (this.configuration.Ratings.Contains(rating.RatingName))
                                         {
-                                            this.configuration.ConfigurationProperties.Ratings.Remove(rating.RatingName);
+                                            this.configuration.Ratings.Remove(rating.RatingName);
                                         }
                                     }
 
@@ -478,9 +478,9 @@ namespace FFXIVRPCalendarPlugin.UI
                 }
                 else
                 {
-                    if (this.configuration.ConfigurationProperties.Categories == null)
+                    if (this.configuration.Categories == null)
                     {
-                        this.configuration.ConfigurationProperties.Categories = this.EventCategories
+                        this.configuration.Categories = this.EventCategories
                             .Where(x => x.CategoryName != null)
                             .Select(x => x.CategoryName ?? string.Empty)
                             .ToList();
@@ -492,21 +492,21 @@ namespace FFXIVRPCalendarPlugin.UI
                     {
                         if (category.CategoryName != null)
                         {
-                            bool check = this.configuration.ConfigurationProperties.Categories.Contains(category.CategoryName);
+                            bool check = this.configuration.Categories.Contains(category.CategoryName);
                             if (ImGui.Checkbox(category.CategoryName, ref check))
                             {
                                 if (check)
                                 {
-                                    if (!this.configuration.ConfigurationProperties.Categories.Contains(category.CategoryName))
+                                    if (!this.configuration.Categories.Contains(category.CategoryName))
                                     {
-                                        this.configuration.ConfigurationProperties.Categories.Add(category.CategoryName);
+                                        this.configuration.Categories.Add(category.CategoryName);
                                     }
                                 }
                                 else
                                 {
-                                    if (this.configuration.ConfigurationProperties.Categories.Contains(category.CategoryName))
+                                    if (this.configuration.Categories.Contains(category.CategoryName))
                                     {
-                                        this.configuration.ConfigurationProperties.Categories.Remove(category.CategoryName);
+                                        this.configuration.Categories.Remove(category.CategoryName);
                                     }
                                 }
 
@@ -547,7 +547,7 @@ namespace FFXIVRPCalendarPlugin.UI
             {
                 this.isLoading = true;
 
-                Task<List<ESRBRatingInfo>>.Run(async () => await CalendarService.ESRBRatings(this.configuration.ConfigurationProperties)
+                Task<List<ESRBRatingInfo>>.Run(async () => await CalendarService.ESRBRatings(this.configuration)
                     .ContinueWith(t =>
                        {
                            if (t.IsFaulted)
@@ -570,7 +570,7 @@ namespace FFXIVRPCalendarPlugin.UI
                            }
                        }));
 
-                Task.Run(async () => await CalendarService.EventCategories(this.configuration.ConfigurationProperties)
+                Task.Run(async () => await CalendarService.EventCategories(this.configuration)
                     .ContinueWith(t =>
                     {
                         if (t.IsFaulted)
