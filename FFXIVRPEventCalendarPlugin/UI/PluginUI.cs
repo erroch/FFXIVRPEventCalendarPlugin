@@ -216,58 +216,6 @@ namespace FFXIVRPCalendarPlugin.UI
             }
         }
 
-        private void BuildEventTable(List<RPEvent>? eventList, string tableId, bool optionsOpen)
-        {
-            this.BuildEventRangeCombo(this.configuration.EventTimeframe);
-
-            if (eventList == null || eventList.Count == 0)
-            {
-                ImGui.Text("No events found.");
-                return;
-            }
-
-            float tableSize = ImGui.GetWindowHeight() - HeaderSize - FooterSize;
-
-            if (optionsOpen)
-            {
-                tableSize -= OptionsSize;
-            }
-
-            Vector2 outerSize = new (0, tableSize);
-            if (ImGui.BeginTable(
-                tableId,
-                6,
-                ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.ScrollY,
-                outerSize))
-            {
-                ImGui.TableSetupColumn("Server");
-                ImGui.TableSetupColumn("Start Time");
-                ImGui.TableSetupColumn("Name");
-                ImGui.TableSetupColumn("Location");
-                ImGui.TableSetupColumn("URL");
-                ImGui.TableSetupColumn("Category");
-                ImGui.TableHeadersRow();
-                foreach (RPEvent myEvent in eventList)
-                {
-                    ImGui.TableNextRow();
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{myEvent.Server}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{myEvent.LocalStartTime:g}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{myEvent.EventName}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{myEvent.Location}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{myEvent.EventURL}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{myEvent.EventCategory}");
-                }
-
-                ImGui.EndTable();
-            }
-        }
-
         private void DrawMainWindow()
         {
             if (!this.Visible)
@@ -341,6 +289,91 @@ namespace FFXIVRPCalendarPlugin.UI
             }
 
             ImGui.End();
+        }
+
+        private void BuildEventTable(List<RPEvent>? eventList, string tableId, bool optionsOpen)
+        {
+            this.BuildEventRangeCombo(this.configuration.EventTimeframe);
+
+            if (eventList == null || eventList.Count == 0)
+            {
+                ImGui.Text("No events found.");
+                return;
+            }
+
+            float tableSize = ImGui.GetWindowHeight() - HeaderSize - FooterSize;
+
+            if (optionsOpen)
+            {
+                tableSize -= OptionsSize;
+            }
+
+            Vector2 outerSize = new (0, tableSize);
+            if (ImGui.BeginTable(
+                tableId,
+                7,
+                ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.ScrollY,
+                outerSize))
+            {
+                ImGui.TableSetupColumn("Server");
+                ImGui.TableSetupColumn("Start Time");
+                ImGui.TableSetupColumn("Name");
+                ImGui.TableSetupColumn("Location");
+                ImGui.TableSetupColumn("URL");
+                ImGui.TableSetupColumn("Category");
+                ImGui.TableSetupColumn(" ");
+                ImGui.TableHeadersRow();
+
+                int rowNumber = 0;
+                foreach (RPEvent myEvent in eventList)
+                {
+                    string rowId = $"eventRow_{rowNumber}";
+                    ImGui.PushID(rowId);
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.Server}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.LocalStartTime:g}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.EventName}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.Location}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.EventURL}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.EventCategory}");
+                    ImGui.TableNextColumn();
+                    this.BuildDescriptionPopout(myEvent, rowNumber);
+                    ImGui.PopID();
+
+                    rowNumber++;
+                }
+
+                ImGui.EndTable();
+            }
+        }
+
+        private void BuildDescriptionPopout(RPEvent rpEvent, int rowNumber)
+        {
+            string popupId = $"eventdetails{rowNumber}";
+
+            if (ImGui.SmallButton("Details"))
+            {
+                ImGui.OpenPopup(popupId);
+            }
+
+            if (ImGui.BeginPopup(popupId, ImGuiWindowFlags.AlwaysAutoResize))
+            {
+                ImGui.Text(rpEvent.EventName);
+                ImGui.Separator();
+                ImGui.Text(rpEvent.ShortDescription);
+                if (ImGui.Button("Close"))
+                {
+                    ImGui.CloseCurrentPopup();
+                }
+
+                ImGui.EndPopup();
+            }
         }
 
         private bool BuildOptions()
