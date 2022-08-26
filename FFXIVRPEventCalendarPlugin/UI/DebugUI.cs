@@ -11,6 +11,8 @@ namespace FFXIVRPCalendarPlugin.UI
     using System.Linq;
     using System.Numerics;
 
+    using Dalamud.Logging;
+
     using FFXIVRPCalendarPlugin;
     using FFXIVRPCalendarPlugin.Models;
     using FFXIVRPCalendarPlugin.Services;
@@ -138,6 +140,7 @@ namespace FFXIVRPCalendarPlugin.UI
             }
             catch (Exception ex)
             {
+                PluginLog.LogError(ex, ex.Message);
                 Plugin.ChatGui.PrintError($"RPEventCalendar: DebugIU: {ex.Message}");
             }
 

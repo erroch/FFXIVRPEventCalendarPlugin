@@ -12,6 +12,8 @@ namespace FFXIVRPCalendarPlugin.Services
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
+    using Dalamud.Configuration;
+    using Dalamud.Logging;
 
     using FFXIVRPCalendarPlugin.Models;
     using FFXIVRPCalendarPlugin.Models.Mock;
@@ -66,6 +68,7 @@ namespace FFXIVRPCalendarPlugin.Services
                 }
                 catch (Exception ex)
                 {
+                    PluginLog.LogError(ex, ex.Message);
                     throw new Exception($"URL: {url}: ex: {ex.Message}");
                 }
             }
@@ -103,6 +106,7 @@ namespace FFXIVRPCalendarPlugin.Services
                 }
                 catch (Exception ex)
                 {
+                    PluginLog.LogError(ex, ex.Message);
                     throw new Exception($"URL: {url}: ex: {ex.Message}");
                 }
             }
