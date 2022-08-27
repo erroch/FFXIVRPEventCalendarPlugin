@@ -14,6 +14,8 @@ namespace FFXIVRPCalendarPlugin.UI
 
     using Dalamud.Game.ClientState;
     using Dalamud.Game.Gui;
+    using Dalamud.Interface;
+    using Dalamud.Interface.Components;
     using Dalamud.IoC;
 
     using FFXIVRPCalendarPlugin;
@@ -34,6 +36,7 @@ namespace FFXIVRPCalendarPlugin.UI
         private readonly EventsService eventsService;
         private readonly Configuration configuration;
         private readonly SettingsUI settingsUI;
+        private readonly DetailsUI detailsUI;
         private readonly DebugUI debugUI;
         private bool visible = false;
         private bool isLoading = false;
@@ -49,6 +52,7 @@ namespace FFXIVRPCalendarPlugin.UI
             this.LoadConfigureSettings();
             this.settingsUI = new SettingsUI(configuration);
             this.debugUI = new DebugUI();
+            this.detailsUI = new DetailsUI(configuration);
             this.eventsService = new EventsService(configuration);
         }
 
@@ -151,6 +155,7 @@ namespace FFXIVRPCalendarPlugin.UI
             this.DrawMainWindow();
             this.settingsUI.Draw();
             this.debugUI.Draw();
+            this.detailsUI.Draw();
         }
 
         /// <summary>
@@ -171,6 +176,16 @@ namespace FFXIVRPCalendarPlugin.UI
                     if (this.eventsService != null)
                     {
                         this.eventsService.Dispose();
+                    }
+
+                    if (this.detailsUI != null)
+                    {
+                        this.detailsUI.Dispose();
+                    }
+
+                    if (this.debugUI != null)
+                    {
+                        this.debugUI.Dispose();
                     }
                 }
 
@@ -216,58 +231,6 @@ namespace FFXIVRPCalendarPlugin.UI
             }
         }
 
-        private void BuildEventTable(List<RPEvent>? eventList, string tableId, bool optionsOpen)
-        {
-            this.BuildEventRangeCombo(this.configuration.EventTimeframe);
-
-            if (eventList == null || eventList.Count == 0)
-            {
-                ImGui.Text("No events found.");
-                return;
-            }
-
-            float tableSize = ImGui.GetWindowHeight() - HeaderSize - FooterSize;
-
-            if (optionsOpen)
-            {
-                tableSize -= OptionsSize;
-            }
-
-            Vector2 outerSize = new (0, tableSize);
-            if (ImGui.BeginTable(
-                tableId,
-                6,
-                ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.ScrollY,
-                outerSize))
-            {
-                ImGui.TableSetupColumn("Server");
-                ImGui.TableSetupColumn("Start Time");
-                ImGui.TableSetupColumn("Name");
-                ImGui.TableSetupColumn("Location");
-                ImGui.TableSetupColumn("URL");
-                ImGui.TableSetupColumn("Category");
-                ImGui.TableHeadersRow();
-                foreach (RPEvent myEvent in eventList)
-                {
-                    ImGui.TableNextRow();
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{myEvent.Server}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{myEvent.LocalStartTime:g}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{myEvent.EventName}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{myEvent.Location}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{myEvent.EventURL}");
-                    ImGui.TableNextColumn();
-                    ImGui.Text($"{myEvent.EventCategory}");
-                }
-
-                ImGui.EndTable();
-            }
-        }
-
         private void DrawMainWindow()
         {
             if (!this.Visible)
@@ -276,7 +239,7 @@ namespace FFXIVRPCalendarPlugin.UI
             }
 
             this.eventsService.RefreshEvents();
-            ImGui.SetNextWindowSize(new Vector2(375, 330), ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.Appearing);
             ImGui.SetNextWindowSizeConstraints(new Vector2(375, 330), new Vector2(float.MaxValue, float.MaxValue));
             if (ImGui.Begin("FFXIV RP Event Calendar", ref this.visible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
@@ -343,6 +306,73 @@ namespace FFXIVRPCalendarPlugin.UI
             ImGui.End();
         }
 
+        private void BuildEventTable(List<RPEvent>? eventList, string tableId, bool optionsOpen)
+        {
+            this.BuildEventRangeCombo(this.configuration.EventTimeframe);
+
+            if (eventList == null || eventList.Count == 0)
+            {
+                ImGui.Text("No events found.");
+                return;
+            }
+
+            float tableSize = ImGui.GetWindowHeight() - HeaderSize - FooterSize;
+
+            if (optionsOpen)
+            {
+                tableSize -= OptionsSize;
+            }
+
+            Vector2 outerSize = new (0, tableSize);
+            if (ImGui.BeginTable(
+                tableId,
+                7,
+                ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.ScrollY,
+                outerSize))
+            {
+                ImGui.TableSetupColumn("Server");
+                ImGui.TableSetupColumn("Start Time");
+                ImGui.TableSetupColumn("Name");
+                ImGui.TableSetupColumn("Location");
+                ImGui.TableSetupColumn("URL");
+                ImGui.TableSetupColumn("Category");
+                ImGui.TableSetupColumn(" ", ImGuiTableColumnFlags.WidthFixed);
+                ImGui.TableHeadersRow();
+
+                int rowNumber = 0;
+                foreach (RPEvent myEvent in eventList)
+                {
+                    string rowId = $"eventRow_{rowNumber}";
+                    ImGui.PushID(rowId);
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.Server}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.LocalStartTime:g}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.EventName}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.Location}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.EventURL}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.EventCategory}");
+                    ImGui.TableNextColumn();
+                    if (ImGui.SmallButton("..."))
+                    {
+                        this.detailsUI.RPEvent = myEvent;
+                        this.detailsUI.Visible = true;
+                    }
+
+                    ImGui.PopID();
+
+                    rowNumber++;
+                }
+
+                ImGui.EndTable();
+            }
+        }
+
         private bool BuildOptions()
         {
             if (ImGui.CollapsingHeader("Options"))
@@ -388,6 +418,12 @@ namespace FFXIVRPCalendarPlugin.UI
 
                                     this.configuration.Save();
                                     this.eventsService.FilterEvents();
+                                }
+
+                                if (rating.Description != null)
+                                {
+                                    ImGui.SameLine();
+                                    ImGuiUtilities.BuildToolTip(rating.Description);
                                 }
                             }
 
@@ -494,6 +530,7 @@ namespace FFXIVRPCalendarPlugin.UI
                            else
                            {
                                this.ESRBRatings = t.Result;
+                               this.detailsUI.ESRBRatings = t.Result;
                            }
                        }));
 
@@ -515,6 +552,7 @@ namespace FFXIVRPCalendarPlugin.UI
                         else
                         {
                             this.EventCategories = t.Result;
+                            this.detailsUI.EventCategories = t.Result;
                         }
                     }));
             }
