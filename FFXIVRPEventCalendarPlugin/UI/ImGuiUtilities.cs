@@ -6,6 +6,10 @@
 
 namespace FFXIVRPCalendarPlugin.UI
 {
+    using System;
+    using System.Diagnostics;
+    using System.Globalization;
+
     using ImGuiNET;
 
     /// <summary>
@@ -29,5 +33,23 @@ namespace FFXIVRPCalendarPlugin.UI
                 ImGui.EndTooltip();
             }
         }
+
+        /// <summary>
+        /// Open a browser window to the provided URL.
+        /// </summary>
+        /// <param name="url">The URL to open.</param>
+        public static void OpenBrowser(string url)
+        {
+            Uri uri = new Uri(url);
+            if (!uri.IsFile && !uri.IsUnc && uri.IsAbsoluteUri)
+            {
+                Process.Start(new ProcessStartInfo()
+                {
+                    FileName = uri.ToString(),
+                    UseShellExecute = true,
+                });
+            }
+        }
+
     }
 }
