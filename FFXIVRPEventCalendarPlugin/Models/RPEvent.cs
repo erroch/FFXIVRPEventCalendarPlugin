@@ -59,6 +59,11 @@ namespace FFXIVRPCalendarPlugin.Models
         public string? Description { get; set; }
 
         /// <summary>
+        /// Gets or sets the Event Short Description. This does not include segement information that populates other fields.
+        /// </summary>
+        public string? ShortDescription { get; set; }
+
+        /// <summary>
         /// Gets or sets the Event Category Name.
         /// </summary>
         public string EventCategory { get; set; } = string.Empty;

@@ -13,6 +13,12 @@ namespace FFXIVRPCalendarPlugin.UI
     using System.Text;
     using System.Threading.Tasks;
 
+    using Dalamud.Game.ClientState;
+    using Dalamud.Game.Gui;
+    using Dalamud.Interface;
+    using Dalamud.Interface.Components;
+    using Dalamud.IoC;
+
     using FFXIVRPCalendarPlugin;
     using FFXIVRPCalendarPlugin.Models;
     using FFXIVRPCalendarPlugin.Services;
@@ -35,6 +41,7 @@ namespace FFXIVRPCalendarPlugin.UI
         private readonly EventsService eventsService;
         private readonly Configuration configuration;
         private readonly SettingsUI settingsUI;
+        private readonly DetailsUI detailsUI;
         private readonly DebugUI debugUI;
         private bool visible = false;
         private bool isLoading = false;
@@ -51,6 +58,7 @@ namespace FFXIVRPCalendarPlugin.UI
             this.LoadConfigureSettings();
             this.settingsUI = new SettingsUI(configuration);
             this.debugUI = new DebugUI();
+            this.detailsUI = new DetailsUI(configuration);
             this.eventsService = new EventsService(configuration);
         }
 
@@ -188,6 +196,7 @@ namespace FFXIVRPCalendarPlugin.UI
             this.DrawMainWindow();
             this.settingsUI.Draw();
             this.debugUI.Draw();
+            this.detailsUI.Draw();
         }
 
         /// <summary>
@@ -208,6 +217,16 @@ namespace FFXIVRPCalendarPlugin.UI
                     if (this.eventsService != null)
                     {
                         this.eventsService.Dispose();
+                    }
+
+                    if (this.detailsUI != null)
+                    {
+                        this.detailsUI.Dispose();
+                    }
+
+                    if (this.debugUI != null)
+                    {
+                        this.debugUI.Dispose();
                     }
                 }
 
@@ -334,7 +353,7 @@ namespace FFXIVRPCalendarPlugin.UI
             }
 
             this.eventsService.RefreshEvents();
-            ImGui.SetNextWindowSize(new Vector2(375, 330), ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.Appearing);
             ImGui.SetNextWindowSizeConstraints(new Vector2(375, 330), new Vector2(float.MaxValue, float.MaxValue));
             if (ImGui.Begin("FFXIV RP Event Calendar", ref this.visible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
@@ -462,6 +481,12 @@ namespace FFXIVRPCalendarPlugin.UI
                                     this.configuration.Save();
                                     this.eventsService.FilterEvents();
                                 }
+
+                                if (rating.Description != null)
+                                {
+                                    ImGui.SameLine();
+                                    ImGuiUtilities.BuildToolTip(rating.Description);
+                                }
                             }
 
                             ImGui.SameLine();
@@ -567,6 +592,7 @@ namespace FFXIVRPCalendarPlugin.UI
                            else
                            {
                                this.ESRBRatings = t.Result;
+                               this.detailsUI.ESRBRatings = t.Result;
                            }
                        }));
 
@@ -588,6 +614,7 @@ namespace FFXIVRPCalendarPlugin.UI
                         else
                         {
                             this.EventCategories = t.Result;
+                            this.detailsUI.EventCategories = t.Result;
                         }
                     }));
             }
