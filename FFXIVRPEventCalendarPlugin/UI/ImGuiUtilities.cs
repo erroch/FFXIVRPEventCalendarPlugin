@@ -10,6 +10,7 @@ namespace FFXIVRPCalendarPlugin.UI
     using System.Diagnostics;
     using System.Globalization;
 
+    using System.Numerics;
     using ImGuiNET;
 
     /// <summary>
@@ -51,5 +52,18 @@ namespace FFXIVRPCalendarPlugin.UI
             }
         }
 
+
+        /// <summary>
+        /// Calculate vector of widgets.
+        /// </summary>
+        /// <param name="width1">The first width value.</param>
+        /// <param name="width2">The second width value.</param>
+        /// <returns>A new Vector2.</returns>
+        public static Vector2 CalcWidgetChildFrameVector2(float width1, float width2)
+        {
+            float width = (width1 + width2) * 1.3f;
+            float height = ImGui.GetTextLineHeightWithSpacing() * 1.3f;
+            return new Vector2(width, height);
+        }
     }
 }
