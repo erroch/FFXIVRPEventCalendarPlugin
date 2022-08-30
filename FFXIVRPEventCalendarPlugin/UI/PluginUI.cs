@@ -333,11 +333,6 @@ namespace FFXIVRPCalendarPlugin.UI
                         ImGui.EndTabItem();
                     }
 
-                    if (ImGui.BeginTabItem("Test"))
-                    {
-                        ImGui.EndTabItem();
-                    }
-
                     ImGui.EndTabBar();
                 }
             }
