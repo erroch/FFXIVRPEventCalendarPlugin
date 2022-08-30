@@ -294,7 +294,7 @@ namespace FFXIVRPCalendarPlugin.UI
             const float detailsWidth = 320f;
 
             this.eventsService.RefreshEvents();
-            ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.Appearing);
+            ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowSizeConstraints(new Vector2(720, 330), new Vector2(float.MaxValue, float.MaxValue));
             if (ImGui.Begin("FFXIV RP Event Calendar", ref this.visible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
