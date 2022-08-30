@@ -10,6 +10,7 @@ namespace FFXIVRPCalendarPlugin.Services
     using System.Collections.Generic;
     using System.Linq;
     using System.Numerics;
+    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
 
     using Dalamud.Logging;
@@ -172,7 +173,10 @@ namespace FFXIVRPCalendarPlugin.Services
                 }
                 else
                 {
-                    this.ServerEvents = this.FilteredEvents?.Where(x => x.ServerId == gameWorld.RowId).ToList();
+                    this.ServerEvents = this.FilteredEvents?
+                        .Where(x => x.ServerId == gameWorld.RowId)
+                        .ToList();
+
                     uint[] worldIds = WorldService.GetDatacenterWorldIds(gameWorld.DataCenter.Row);
 
                     this.DatacenterEvents = this.FilteredEvents?
