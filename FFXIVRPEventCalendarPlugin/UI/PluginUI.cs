@@ -31,8 +31,6 @@ namespace FFXIVRPCalendarPlugin.UI
     /// </summary>
     public class PluginUI : IDisposable
     {
-        private const float OptionsSize = 122;
-        private const float HeaderSize = 200;
         private const float FooterSize = 35;
 
         private const string ComboEventRangeTitle = "Event Range: ";
@@ -41,7 +39,6 @@ namespace FFXIVRPCalendarPlugin.UI
         private readonly EventsService eventsService;
         private readonly Configuration configuration;
         private readonly SettingsUI settingsUI;
-        private readonly DetailsUI detailsUI;
         private readonly DebugUI debugUI;
         private bool visible = false;
         private bool isLoading = false;
@@ -58,7 +55,6 @@ namespace FFXIVRPCalendarPlugin.UI
             this.LoadConfigureSettings();
             this.settingsUI = new SettingsUI(configuration);
             this.debugUI = new DebugUI();
-            this.detailsUI = new DetailsUI(configuration);
             this.eventsService = new EventsService(configuration);
         }
 
@@ -146,6 +142,34 @@ namespace FFXIVRPCalendarPlugin.UI
 
         private List<ESRBRatingInfo>? ESRBRatings { get; set; }
 
+        private RPEvent? SelectedRPEvent { get; set; }
+
+        /// <summary>
+        /// Returns given event list filtered by searchFilter string.
+        /// </summary>
+        /// <param name="events"> Given time frame from configuration.</param>
+        /// <param name="searchFilter"> Given search filter.</param>
+        /// <returns> The given event list filtered by event name.</returns>
+        public static List<RPEvent>? SearchEvents(List<RPEvent>? events, string searchFilter)
+        {
+            List<RPEvent>? rPEvents = new ();
+
+            if (events == null)
+            {
+                return rPEvents;
+            }
+
+            foreach (RPEvent e in events!)
+            {
+                if (e.EventName!.ToLower().IndexOf(searchFilter.ToLower()) != -1)
+                {
+                    rPEvents.Add(e);
+                }
+            }
+
+            return rPEvents;
+        }
+
         /// <summary>
         /// Returns given event list filtered by searchFilter string.
         /// </summary>
@@ -196,7 +220,6 @@ namespace FFXIVRPCalendarPlugin.UI
             this.DrawMainWindow();
             this.settingsUI.Draw();
             this.debugUI.Draw();
-            this.detailsUI.Draw();
         }
 
         /// <summary>
@@ -217,11 +240,6 @@ namespace FFXIVRPCalendarPlugin.UI
                     if (this.eventsService != null)
                     {
                         this.eventsService.Dispose();
-                    }
-
-                    if (this.detailsUI != null)
-                    {
-                        this.detailsUI.Dispose();
                     }
 
                     if (this.debugUI != null)
@@ -340,9 +358,19 @@ namespace FFXIVRPCalendarPlugin.UI
                     ImGui.TableNextColumn();
                     ImGui.Text($"{myEvent.EventCategory}");
                 }
-
                 ImGui.EndTable();
             }
+
+            ImGui.EndChild();
+        }
+
+        private void BuildEventSearchTextBox()
+        {
+            uint buf = 64;
+
+            ImGui.Text(TextBoxSearchTitle);
+            ImGui.SameLine();
+            ImGui.InputText(" ", this.TextBuffer, buf);
         }
 
         private void DrawMainWindow()
@@ -352,10 +380,50 @@ namespace FFXIVRPCalendarPlugin.UI
                 return;
             }
 
+            const float detailsWidth = 320f;
+
             this.eventsService.RefreshEvents();
             ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.Appearing);
-            ImGui.SetNextWindowSizeConstraints(new Vector2(375, 330), new Vector2(float.MaxValue, float.MaxValue));
+            ImGui.SetNextWindowSizeConstraints(new Vector2(720, 330), new Vector2(float.MaxValue, float.MaxValue));
             if (ImGui.Begin("FFXIV RP Event Calendar", ref this.visible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            {
+                if (ImGui.BeginChild("##mainwindow", new Vector2(ImGui.GetContentRegionAvail().X, -1f * FooterSize * ImGuiHelpers.GlobalScale), false, ImGuiWindowFlags.NoScrollbar))
+                {
+                    if (ImGui.BeginTable("##mainSizingTable", 2, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.Resizable | ImGuiTableFlags.BordersInnerV))
+                    {
+                        ImGui.TableSetupColumn("##eventListColumn", ImGuiTableColumnFlags.WidthStretch);
+                        ImGui.TableSetupColumn("##detailListColumn", ImGuiTableColumnFlags.WidthStretch, detailsWidth);
+                        ImGui.TableNextRow();
+
+                        ImGui.TableNextColumn();
+
+                        this.BuildEventListColumn();
+
+                        ImGui.TableNextColumn();
+
+                        this.BuildDetailsColumn();
+                    }
+
+                    ImGui.EndTable();
+                }
+
+                ImGui.EndChild();
+
+                ImGui.Separator();
+                ImGui.Text($"Event list last udpated on: {this.eventsService.LastRefreshLocalTime:g}");
+                ImGui.SameLine();
+                if (ImGui.Button("Refresh"))
+                {
+                    this.eventsService.RefreshEvents(forceRefresh: true);
+                }
+            }
+
+            ImGui.End();
+        }
+
+        private void BuildEventListColumn()
+        {
+            if (ImGui.BeginChild("##EventListPane", new Vector2(-1, -1), true))
             {
                 TimeZoneInfo timeZoneInfo = TimeZoneInfo.Local;
 
@@ -370,7 +438,7 @@ namespace FFXIVRPCalendarPlugin.UI
 
                 ImGui.Separator();
 
-                bool optionsOpen = this.BuildOptions();
+                this.BuildOptions();
 
                 ImGui.Text("Event Lists");
 
@@ -385,7 +453,7 @@ namespace FFXIVRPCalendarPlugin.UI
                             serverEvents = SearchEvents(serverEvents, Encoding.Default.GetString(this.TextBuffer));
                         }
 
-                        this.BuildEventTable(serverEvents, "##ServerEvents", optionsOpen);
+                        this.BuildEventTable(serverEvents, "##ServerEvents");
                         ImGui.EndTabItem();
                     }
 
@@ -398,7 +466,7 @@ namespace FFXIVRPCalendarPlugin.UI
                             serverEvents = SearchEvents(serverEvents, Encoding.Default.GetString(this.TextBuffer));
                         }
 
-                        this.BuildEventTable(serverEvents, "##DatacenterEvents", optionsOpen);
+                        this.BuildEventTable(serverEvents, "##DatacenterEvents");
                         ImGui.EndTabItem();
                     }
 
@@ -411,7 +479,7 @@ namespace FFXIVRPCalendarPlugin.UI
                             serverEvents = SearchEvents(serverEvents, Encoding.Default.GetString(this.TextBuffer));
                         }
 
-                        this.BuildEventTable(serverEvents, "##RegionEvents", optionsOpen);
+                        this.BuildEventTable(serverEvents, "##RegionEvents");
                         ImGui.EndTabItem();
                     }
 
@@ -424,18 +492,206 @@ namespace FFXIVRPCalendarPlugin.UI
                 }
             }
 
-            ImGui.Separator();
-            ImGui.Text($"Event list last udpated on: {this.eventsService.LastRefreshLocalTime:g}");
-            ImGui.SameLine();
-            if (ImGui.Button("Refresh"))
-            {
-                this.eventsService.RefreshEvents(forceRefresh: true);
-            }
-
-            ImGui.End();
+            ImGui.EndChild();
         }
 
-        private bool BuildOptions()
+        private void BuildDetailsColumn()
+        {
+            if (this.SelectedRPEvent == null)
+            {
+                ImGui.Text("Select an Event to display details.");
+            }
+            else
+            {
+                ImGui.Text(this.SelectedRPEvent.EventName);
+                ImGui.Spacing();
+
+                if (ImGui.BeginChild("###eventDetails", new Vector2(-1, -1), true))
+                {
+                    if (!string.IsNullOrWhiteSpace(this.SelectedRPEvent.EventURL))
+                    {
+                        ImGui.Text("Website:");
+                        ImGui.Separator();
+                        ImGui.Text(this.SelectedRPEvent.EventURL);
+                        ImGui.SameLine();
+                        if (ImGuiComponents.IconButton(FontAwesomeIcon.Globe))
+                        {
+                            ImGuiUtilities.OpenBrowser(this.SelectedRPEvent.EventURL);
+                        }
+
+                        ImGui.Spacing();
+                    }
+
+                    ImGui.Text("When:");
+                    ImGui.Separator();
+                    ImGui.Text($"{this.SelectedRPEvent.LocalStartTime.ToShortDateString()} {this.SelectedRPEvent.LocalStartTime.ToShortTimeString()} - {this.SelectedRPEvent.LocalEndTime.ToShortTimeString()}");
+                    ImGui.Spacing();
+
+                    if (!string.IsNullOrWhiteSpace(this.SelectedRPEvent.Location))
+                    {
+                        ImGui.Text("Location:");
+                        ImGui.Separator();
+
+                        string serverLine = string.Empty;
+                        if (!string.IsNullOrWhiteSpace(this.SelectedRPEvent.Datacenter))
+                        {
+                            serverLine = $"{this.SelectedRPEvent.Datacenter} - ";
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(this.SelectedRPEvent.Server))
+                        {
+                            serverLine += $"{this.SelectedRPEvent.Server}: ";
+                        }
+
+                        float wrapWidth = ImGui.GetWindowContentRegionMax().X;
+                        ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + wrapWidth - 10);
+                        ImGui.Text($"{serverLine}{this.SelectedRPEvent.Location}");
+                        ImGui.PopTextWrapPos();
+                        ImGui.Spacing();
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(this.SelectedRPEvent.ESRBRating))
+                    {
+                        ImGui.Text("ESRB Rating:");
+                        ImGui.Separator();
+                        ImGui.Text(this.SelectedRPEvent.ESRBRating);
+
+                        if (this.ESRBRatings != null)
+                        {
+                            ESRBRatingInfo? esrbRatingInfo = this.ESRBRatings
+                                .Where(x => x.RatingName == this.SelectedRPEvent.ESRBRating)
+                                .FirstOrDefault();
+
+                            if (esrbRatingInfo != null && esrbRatingInfo.Description != null)
+                            {
+                                ImGui.SameLine();
+                                ImGuiUtilities.BuildToolTip(esrbRatingInfo.Description);
+                            }
+                        }
+
+                        ImGui.Spacing();
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(this.SelectedRPEvent.ShortDescription))
+                    {
+                        ImGui.Text("Description:");
+                        ImGui.Separator();
+
+                        float wrapWidth = ImGui.GetWindowContentRegionMax().X;
+                        ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + wrapWidth - 10);
+                        ImGui.Text(this.SelectedRPEvent.ShortDescription);
+                        ImGui.PopTextWrapPos();
+
+                        ImGui.Spacing();
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(this.SelectedRPEvent.EventCategory))
+                    {
+                        ImGui.Text("Category:");
+                        ImGui.Separator();
+
+                        ImGui.Text($"{this.SelectedRPEvent.EventCategory}");
+
+                        if (this.EventCategories != null)
+                        {
+                            EventCategoryInfo? eventCategoryInfo = this.EventCategories
+                                .Where(x => x.CategoryName == this.SelectedRPEvent.EventCategory)
+                                .FirstOrDefault();
+
+                            if (eventCategoryInfo != null && eventCategoryInfo.Description != null)
+                            {
+                                ImGui.SameLine();
+                                ImGuiUtilities.BuildToolTip(eventCategoryInfo.Description);
+                            }
+                        }
+
+                        ImGui.Spacing();
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(this.SelectedRPEvent.Contacts))
+                    {
+                        ImGui.Text("Contacts:");
+                        ImGui.Separator();
+
+                        float wrapWidth = ImGui.GetWindowContentRegionMax().X;
+                        ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + wrapWidth - 10);
+                        ImGui.Text(this.SelectedRPEvent.Contacts);
+                        ImGui.PopTextWrapPos();
+                    }
+                }
+
+                ImGui.EndChild();
+            }
+        }
+
+        private void BuildEventTable(List<RPEvent>? eventList, string tableId)
+        {
+            this.BuildWidgets();
+
+            if (eventList == null || eventList.Count == 0)
+            {
+                ImGui.Text("No events found.");
+                return;
+            }
+
+            Vector2 outerSize = new (-1, -1);
+            if (ImGui.BeginTable(
+                tableId,
+                9,
+                ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.Hideable | ImGuiTableFlags.Resizable | ImGuiTableFlags.Reorderable | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.ScrollY,
+                outerSize))
+            {
+                ImGui.TableSetupColumn("Server");
+                ImGui.TableSetupColumn("Datacenter", ImGuiTableColumnFlags.DefaultHide);
+                ImGui.TableSetupColumn("Start Time");
+                ImGui.TableSetupColumn("End Time", ImGuiTableColumnFlags.DefaultHide);
+                ImGui.TableSetupColumn("Name");
+                ImGui.TableSetupColumn("Location");
+                ImGui.TableSetupColumn("URL");
+                ImGui.TableSetupColumn("Rating", ImGuiTableColumnFlags.DefaultHide);
+                ImGui.TableSetupColumn("Category");
+                ImGui.TableHeadersRow();
+
+                int rowNumber = 0;
+                foreach (RPEvent myEvent in eventList)
+                {
+                    bool rowSelected = myEvent == this.SelectedRPEvent;
+
+                    string rowId = $"eventRow_{rowNumber}";
+                    ImGui.PushID(rowId);
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    if (ImGui.Selectable(myEvent.Server, rowSelected, ImGuiSelectableFlags.SpanAllColumns))
+                    {
+                        this.SelectedRPEvent = myEvent;
+                    }
+
+                    ImGui.TableNextColumn();
+                    ImGui.Text(myEvent.Datacenter);
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.LocalStartTime:g}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text(myEvent.LocalEndTime.ToShortTimeString());
+                    ImGui.TableNextColumn();
+                    ImGui.Text(myEvent.EventName);
+                    ImGui.TableNextColumn();
+                    ImGui.Text(myEvent.Location);
+                    ImGui.TableNextColumn();
+                    ImGui.Text(myEvent.EventURL);
+                    ImGui.TableNextColumn();
+                    ImGui.Text(myEvent.ESRBRating);
+                    ImGui.TableNextColumn();
+                    ImGui.Text(myEvent.EventCategory);
+                    ImGui.PopID();
+
+                    rowNumber++;
+                }
+
+                ImGui.EndTable();
+            }
+        }
+
+        private void BuildOptions()
         {
             if (ImGui.CollapsingHeader("Options"))
             {
@@ -559,11 +815,7 @@ namespace FFXIVRPCalendarPlugin.UI
                 }
 
                 ImGui.Separator();
-
-                return true;
             }
-
-            return false;
         }
 
         private void LoadConfigureSettings()
@@ -592,7 +844,6 @@ namespace FFXIVRPCalendarPlugin.UI
                            else
                            {
                                this.ESRBRatings = t.Result;
-                               this.detailsUI.ESRBRatings = t.Result;
                            }
                        }));
 
@@ -614,7 +865,6 @@ namespace FFXIVRPCalendarPlugin.UI
                         else
                         {
                             this.EventCategories = t.Result;
-                            this.detailsUI.EventCategories = t.Result;
                         }
                     }));
             }

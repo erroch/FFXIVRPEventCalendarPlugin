@@ -8,7 +8,6 @@ namespace FFXIVRPCalendarPlugin.UI
 {
     using System;
     using System.Diagnostics;
-    using System.Globalization;
 
     using System.Numerics;
     using ImGuiNET;
@@ -41,7 +40,7 @@ namespace FFXIVRPCalendarPlugin.UI
         /// <param name="url">The URL to open.</param>
         public static void OpenBrowser(string url)
         {
-            Uri uri = new Uri(url);
+            Uri uri = new (url);
             if (!uri.IsFile && !uri.IsUnc && uri.IsAbsoluteUri)
             {
                 Process.Start(new ProcessStartInfo()
@@ -51,7 +50,6 @@ namespace FFXIVRPCalendarPlugin.UI
                 });
             }
         }
-
 
         /// <summary>
         /// Calculate vector of widgets.
