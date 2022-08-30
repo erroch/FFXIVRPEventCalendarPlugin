@@ -171,6 +171,32 @@ namespace FFXIVRPCalendarPlugin.UI
         }
 
         /// <summary>
+        /// Returns given event list filtered by searchFilter string.
+        /// </summary>
+        /// <param name="events"> Given time frame from configuration.</param>
+        /// <param name="searchFilter"> Given search filter.</param>
+        /// <returns> The given event list filtered by event name.</returns>
+        public static List<RPEvent>? SearchEvents(List<RPEvent>? events, string searchFilter)
+        {
+            List<RPEvent>? rPEvents = new ();
+
+            if (events == null)
+            {
+                return rPEvents;
+            }
+
+            foreach (RPEvent e in events!)
+            {
+                if (e.EventName!.ToLower().IndexOf(searchFilter.ToLower()) != -1)
+                {
+                    rPEvents.Add(e);
+                }
+            }
+
+            return rPEvents;
+        }
+
+        /// <summary>
         /// Dispose of the <see cref="PluginUI"/> class.
         /// </summary>
         public void Dispose()
@@ -255,33 +281,84 @@ namespace FFXIVRPCalendarPlugin.UI
 
         private void BuildEventRangeCombo(EventTimeframe selectedTimeFrame)
         {
-            const string comboTitle = "Event Range: ";
+            IEnumerable<EventTimeframe> eventTimeFrames = System.Enum.GetValues(typeof(EventTimeframe)).Cast<EventTimeframe>();
+            ImGui.Text(ComboEventRangeTitle);
+            ImGui.SameLine();
 
-            float width = (ImGui.CalcTextSize(EventTimeframe.NextHours.GetDescription()).X + ImGui.CalcTextSize(comboTitle).X) * 1.3f;
-            float height = ImGui.GetTextLineHeightWithSpacing() * 1.3f;
-            Vector2 vector2 = new (width, height);
-
-            if (ImGui.BeginChild("##eventRangeComboContainer", vector2, false))
+            // has to be non empty or the entire thing won't show.
+            if (ImGui.BeginCombo(" ", selectedTimeFrame.GetDescription()))
             {
-                IEnumerable<EventTimeframe> eventTimeFrames = System.Enum.GetValues(typeof(EventTimeframe)).Cast<EventTimeframe>();
-                ImGui.Text(ComboEventRangeTitle);
-                ImGui.SameLine();
-
-                // has to be non empty or the entire thing won't show.
-                if (ImGui.BeginCombo(" ", selectedTimeFrame.GetDescription()))
+                foreach (EventTimeframe timeFrame in eventTimeFrames)
                 {
-                    foreach (EventTimeframe timeFrame in eventTimeFrames)
+                    if (ImGui.Selectable(timeFrame.GetDescription(), this.configuration.EventTimeframe == timeFrame))
                     {
-                        if (ImGui.Selectable(timeFrame.GetDescription(), this.configuration.EventTimeframe == timeFrame))
-                        {
-                            this.configuration.EventTimeframe = timeFrame;
-                            this.eventsService.FilterEvents();
-                            this.configuration.Save();
-                        }
+                        this.configuration.EventTimeframe = timeFrame;
+                        this.eventsService.FilterEvents();
+                        this.configuration.Save();
                     }
-
-                    ImGui.EndCombo();
                 }
+
+                ImGui.EndCombo();
+            }
+        }
+
+        private void BuildEventSearchTextBox()
+        {
+            uint buf = 64;
+
+            ImGui.Text(TextBoxSearchTitle);
+            ImGui.SameLine();
+            ImGui.InputText(" ", this.TextBuffer, buf);
+        }
+
+        private void BuildEventTable(List<RPEvent>? eventList, string tableId, bool optionsOpen)
+        {
+            this.BuildWidgets();
+
+            if (eventList == null || eventList.Count == 0)
+            {
+                ImGui.Text("No events found.");
+                return;
+            }
+
+            float tableSize = ImGui.GetWindowHeight() - HeaderSize - FooterSize;
+
+            if (optionsOpen)
+            {
+                tableSize -= OptionsSize;
+            }
+
+            Vector2 outerSize = new (0, tableSize);
+            if (ImGui.BeginTable(
+                tableId,
+                6,
+                ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.ScrollY,
+                outerSize))
+            {
+                ImGui.TableSetupColumn("Server");
+                ImGui.TableSetupColumn("Start Time");
+                ImGui.TableSetupColumn("Name");
+                ImGui.TableSetupColumn("Location");
+                ImGui.TableSetupColumn("URL");
+                ImGui.TableSetupColumn("Category");
+                ImGui.TableHeadersRow();
+                foreach (RPEvent myEvent in eventList)
+                {
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.Server}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.LocalStartTime:g}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.EventName}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.Location}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.EventURL}");
+                    ImGui.TableNextColumn();
+                    ImGui.Text($"{myEvent.EventCategory}");
+                }
+                ImGui.EndTable();
             }
 
             ImGui.EndChild();
