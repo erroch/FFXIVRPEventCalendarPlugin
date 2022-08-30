@@ -239,10 +239,9 @@ namespace FFXIVRPCalendarPlugin.UI
             if (ImGui.BeginChildFrame(1, vector2, ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground))
             {
                 this.BuildEventRangeCombo(this.configuration.EventTimeframe);
-
-                ImGui.EndChildFrame();
             }
 
+            ImGui.EndChildFrame();
             ImGui.SameLine();
 
             // Build Search Input Textbox
@@ -251,9 +250,9 @@ namespace FFXIVRPCalendarPlugin.UI
             if (ImGui.BeginChildFrame(2, vector2, ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground))
             {
                 this.BuildEventSearchTextBox();
-
-                ImGui.EndChildFrame();
             }
+
+            ImGui.EndChildFrame();
         }
 
         private void BuildEventRangeCombo(EventTimeframe selectedTimeFrame)
