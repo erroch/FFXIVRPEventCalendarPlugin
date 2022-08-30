@@ -39,7 +39,6 @@ namespace FFXIVRPCalendarPlugin.UI
         private readonly EventsService eventsService;
         private readonly Configuration configuration;
         private readonly SettingsUI settingsUI;
-        private readonly DetailsUI detailsUI;
         private readonly DebugUI debugUI;
         private bool visible = false;
         private bool isLoading = false;
@@ -56,7 +55,6 @@ namespace FFXIVRPCalendarPlugin.UI
             this.LoadConfigureSettings();
             this.settingsUI = new SettingsUI(configuration);
             this.debugUI = new DebugUI();
-            this.detailsUI = new DetailsUI(configuration);
             this.eventsService = new EventsService(configuration);
         }
 
@@ -196,7 +194,6 @@ namespace FFXIVRPCalendarPlugin.UI
             this.DrawMainWindow();
             this.settingsUI.Draw();
             this.debugUI.Draw();
-            this.detailsUI.Draw();
         }
 
         /// <summary>
@@ -758,7 +755,6 @@ namespace FFXIVRPCalendarPlugin.UI
                            else
                            {
                                this.ESRBRatings = t.Result;
-                               this.detailsUI.ESRBRatings = t.Result;
                            }
                        }));
 
@@ -780,7 +776,6 @@ namespace FFXIVRPCalendarPlugin.UI
                         else
                         {
                             this.EventCategories = t.Result;
-                            this.detailsUI.EventCategories = t.Result;
                         }
                     }));
             }
