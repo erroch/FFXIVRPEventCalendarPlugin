@@ -8,8 +8,8 @@ namespace FFXIVRPCalendarPlugin.UI
 {
     using System;
     using System.Diagnostics;
-    using System.Numerics;
     using System.Globalization;
+    using System.Numerics;
 
     using ImGuiNET;
 
