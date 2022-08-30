@@ -39,12 +39,10 @@ namespace FFXIVRPCalendarPlugin.UI
         private readonly EventsService eventsService;
         private readonly Configuration configuration;
         private readonly SettingsUI settingsUI;
-        private readonly DetailsUI detailsUI;
         private readonly DebugUI debugUI;
         private bool visible = false;
         private bool isLoading = false;
         private bool disposedValue;
-        private byte[] textBuffer = new byte[64];
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PluginUI"/> class.
@@ -56,7 +54,6 @@ namespace FFXIVRPCalendarPlugin.UI
             this.LoadConfigureSettings();
             this.settingsUI = new SettingsUI(configuration);
             this.debugUI = new DebugUI();
-            this.detailsUI = new DetailsUI(configuration);
             this.eventsService = new EventsService(configuration);
         }
 
@@ -134,11 +131,7 @@ namespace FFXIVRPCalendarPlugin.UI
         /// <summary>
         /// Gets or sets value of chars array for InputText.
         /// </summary>
-        private byte[] TextBuffer
-        {
-            get { return this.textBuffer; }
-            set { this.textBuffer = value; }
-        }
+        private byte[] TextBuffer { get; set; } = new byte[64];
 
         private List<EventCategoryInfo>? EventCategories { get; set; }
 
@@ -196,7 +189,6 @@ namespace FFXIVRPCalendarPlugin.UI
             this.DrawMainWindow();
             this.settingsUI.Draw();
             this.debugUI.Draw();
-            this.detailsUI.Draw();
         }
 
         /// <summary>
@@ -231,62 +223,6 @@ namespace FFXIVRPCalendarPlugin.UI
             }
         }
 
-        private void BuildWidgets()
-        {
-            // Build Event Range Combo
-            Vector2 vector2 = ImGuiUtilities.CalcWidgetChildFrameVector2(ImGui.CalcTextSize(EventTimeframe.NextHours.GetDescription()).X, ImGui.CalcTextSize(ComboEventRangeTitle).X);
-
-            if (ImGui.BeginChildFrame(1, vector2, ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground))
-            {
-                this.BuildEventRangeCombo(this.configuration.EventTimeframe);
-            }
-
-            ImGui.EndChildFrame();
-            ImGui.SameLine();
-
-            // Build Search Input Textbox
-            vector2 = ImGuiUtilities.CalcWidgetChildFrameVector2(ImGui.GetWindowWidth() / 4, ImGui.CalcTextSize(ComboEventRangeTitle).X);
-
-            if (ImGui.BeginChildFrame(2, vector2, ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground))
-            {
-                this.BuildEventSearchTextBox();
-            }
-
-            ImGui.EndChildFrame();
-        }
-
-        private void BuildEventRangeCombo(EventTimeframe selectedTimeFrame)
-        {
-            IEnumerable<EventTimeframe> eventTimeFrames = System.Enum.GetValues(typeof(EventTimeframe)).Cast<EventTimeframe>();
-            ImGui.Text(ComboEventRangeTitle);
-            ImGui.SameLine();
-
-            // has to be non empty or the entire thing won't show.
-            if (ImGui.BeginCombo(" ", selectedTimeFrame.GetDescription()))
-            {
-                foreach (EventTimeframe timeFrame in eventTimeFrames)
-                {
-                    if (ImGui.Selectable(timeFrame.GetDescription(), this.configuration.EventTimeframe == timeFrame))
-                    {
-                        this.configuration.EventTimeframe = timeFrame;
-                        this.eventsService.FilterEvents();
-                        this.configuration.Save();
-                    }
-                }
-
-                ImGui.EndCombo();
-            }
-        }
-
-        private void BuildEventSearchTextBox()
-        {
-            uint buf = 64;
-
-            ImGui.Text(TextBoxSearchTitle);
-            ImGui.SameLine();
-            ImGui.InputText(" ", this.TextBuffer, buf);
-        }
-
         private void DrawMainWindow()
         {
             if (!this.Visible)
@@ -297,7 +233,7 @@ namespace FFXIVRPCalendarPlugin.UI
             const float detailsWidth = 320f;
 
             this.eventsService.RefreshEvents();
-            ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.Appearing);
+            ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowSizeConstraints(new Vector2(720, 330), new Vector2(float.MaxValue, float.MaxValue));
             if (ImGui.Begin("FFXIV RP Event Calendar", ref this.visible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
@@ -394,11 +330,6 @@ namespace FFXIVRPCalendarPlugin.UI
                         }
 
                         this.BuildEventTable(serverEvents, "##RegionEvents");
-                        ImGui.EndTabItem();
-                    }
-
-                    if (ImGui.BeginTabItem("Test"))
-                    {
                         ImGui.EndTabItem();
                     }
 
@@ -540,7 +471,7 @@ namespace FFXIVRPCalendarPlugin.UI
 
         private void BuildEventTable(List<RPEvent>? eventList, string tableId)
         {
-            this.BuildWidgets();
+            this.BuildEventFilters();
 
             if (eventList == null || eventList.Count == 0)
             {
@@ -609,99 +540,51 @@ namespace FFXIVRPCalendarPlugin.UI
         {
             if (ImGui.CollapsingHeader("Options"))
             {
-                ImGui.Text("ESRB RATINGS");
-                if (this.ESRBRatings == null)
-                {
-                    ImGui.Text("ESRBRatings Loading...");
-                }
-                else
-                {
-                    if (this.configuration.Ratings.Count == 0)
-                    {
-                        this.configuration.Ratings = this.ESRBRatings
-                            .Where(x => x.RatingName != null)
-                            .Select(x => x.RatingName ?? string.Empty)
-                            .ToList();
-                    }
-
-                    foreach (ESRBRatingInfo rating in this.ESRBRatings)
-                    {
-                        if (!rating.RequiresAgeValidation)
-                        {
-                            if (rating.RatingName != null)
-                            {
-                                bool check = this.configuration.Ratings.Contains(rating.RatingName);
-                                if (ImGui.Checkbox(rating.RatingName, ref check))
-                                {
-                                    if (check)
-                                    {
-                                        if (!this.configuration.Ratings.Contains(rating.RatingName))
-                                        {
-                                            this.configuration.Ratings.Add(rating.RatingName);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (this.configuration.Ratings.Contains(rating.RatingName))
-                                        {
-                                            this.configuration.Ratings.Remove(rating.RatingName);
-                                        }
-                                    }
-
-                                    this.configuration.Save();
-                                    this.eventsService.FilterEvents();
-                                }
-
-                                if (rating.Description != null)
-                                {
-                                    ImGui.SameLine();
-                                    ImGuiUtilities.BuildToolTip(rating.Description);
-                                }
-                            }
-
-                            ImGui.SameLine();
-                        }
-                    }
-                }
-
-                ImGui.NewLine();
+                this.BuildESRBOptions();
                 ImGui.Separator();
-                ImGui.Text("CATEGROIES");
-                if (this.EventCategories == null)
+                this.BuildCategoryOptions();
+                ImGui.Separator();
+            }
+        }
+
+        private void BuildESRBOptions()
+        {
+            ImGui.Text("ESRB Retings:");
+            if (this.ESRBRatings == null)
+            {
+                ImGui.Text("ESRBRatings Loading...");
+            }
+            else
+            {
+                if (this.configuration.Ratings.Count == 0)
                 {
-                    ImGui.Text("Categories are loading...");
+                    this.configuration.Ratings = this.ESRBRatings
+                        .Where(x => x.RatingName != null)
+                        .Select(x => x.RatingName ?? string.Empty)
+                        .ToList();
                 }
-                else
+
+                foreach (ESRBRatingInfo rating in this.ESRBRatings)
                 {
-                    if (this.configuration.Categories == null)
+                    if (!rating.RequiresAgeValidation)
                     {
-                        this.configuration.Categories = this.EventCategories
-                            .Where(x => x.CategoryName != null)
-                            .Select(x => x.CategoryName ?? string.Empty)
-                            .ToList();
-                    }
-
-                    int itemCount = 0;
-
-                    foreach (EventCategoryInfo category in this.EventCategories)
-                    {
-                        if (category.CategoryName != null)
+                        if (rating.RatingName != null)
                         {
-                            bool check = this.configuration.Categories.Contains(category.CategoryName);
-                            if (ImGui.Checkbox(category.CategoryName, ref check))
+                            bool check = this.configuration.Ratings.Contains(rating.RatingName);
+                            if (ImGui.Checkbox(rating.RatingName, ref check))
                             {
                                 if (check)
                                 {
-                                    if (!this.configuration.Categories.Contains(category.CategoryName))
+                                    if (!this.configuration.Ratings.Contains(rating.RatingName))
                                     {
-                                        this.configuration.Categories.Add(category.CategoryName);
+                                        this.configuration.Ratings.Add(rating.RatingName);
                                     }
                                 }
                                 else
                                 {
-                                    if (this.configuration.Categories.Contains(category.CategoryName))
+                                    if (this.configuration.Ratings.Contains(rating.RatingName))
                                     {
-                                        this.configuration.Categories.Remove(category.CategoryName);
+                                        this.configuration.Ratings.Remove(rating.RatingName);
                                     }
                                 }
 
@@ -709,27 +592,140 @@ namespace FFXIVRPCalendarPlugin.UI
                                 this.eventsService.FilterEvents();
                             }
 
-                            if (category.Description != null)
+                            if (rating.Description != null)
                             {
                                 ImGui.SameLine();
-                                ImGuiUtilities.BuildToolTip(category.Description);
+                                ImGuiUtilities.BuildToolTip(rating.Description);
                             }
+                        }
 
-                            if (itemCount >= 5)
+                        ImGui.SameLine();
+                    }
+                }
+            }
+
+            ImGui.NewLine();
+        }
+
+        private void BuildCategoryOptions()
+        {
+            ImGui.Text("Categories:");
+            if (this.EventCategories == null)
+            {
+                ImGui.Text("Categories are loading...");
+            }
+            else
+            {
+                if (this.configuration.Categories == null)
+                {
+                    this.configuration.Categories = this.EventCategories
+                        .Where(x => x.CategoryName != null)
+                        .Select(x => x.CategoryName ?? string.Empty)
+                        .ToList();
+                }
+
+                int itemCount = 0;
+
+                foreach (EventCategoryInfo category in this.EventCategories)
+                {
+                    if (category.CategoryName != null)
+                    {
+                        bool check = this.configuration.Categories.Contains(category.CategoryName);
+                        if (ImGui.Checkbox(category.CategoryName, ref check))
+                        {
+                            if (check)
                             {
-                                itemCount = 0;
+                                if (!this.configuration.Categories.Contains(category.CategoryName))
+                                {
+                                    this.configuration.Categories.Add(category.CategoryName);
+                                }
                             }
                             else
                             {
-                                itemCount++;
-                                ImGui.SameLine();
+                                if (this.configuration.Categories.Contains(category.CategoryName))
+                                {
+                                    this.configuration.Categories.Remove(category.CategoryName);
+                                }
                             }
+
+                            this.configuration.Save();
+                            this.eventsService.FilterEvents();
+                        }
+
+                        if (category.Description != null)
+                        {
+                            ImGui.SameLine();
+                            ImGuiUtilities.BuildToolTip(category.Description);
+                        }
+
+                        if (itemCount >= 5)
+                        {
+                            itemCount = 0;
+                        }
+                        else
+                        {
+                            itemCount++;
+                            ImGui.SameLine();
                         }
                     }
                 }
-
-                ImGui.Separator();
             }
+        }
+
+        private void BuildEventFilters()
+        {
+            // Build Event Range Combo
+            Vector2 vector2 = ImGuiUtilities.CalcWidgetChildFrameVector2(ImGui.CalcTextSize(EventTimeframe.NextHours.GetDescription()).X, ImGui.CalcTextSize(ComboEventRangeTitle).X);
+
+            if (ImGui.BeginChildFrame(1, vector2, ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground))
+            {
+                this.BuildEventRangeCombo(this.configuration.EventTimeframe);
+            }
+
+            ImGui.EndChildFrame();
+            ImGui.SameLine();
+
+            // Build Search Input Textbox
+            vector2 = ImGuiUtilities.CalcWidgetChildFrameVector2(ImGui.GetWindowWidth() / 4, ImGui.CalcTextSize(ComboEventRangeTitle).X);
+
+            if (ImGui.BeginChildFrame(2, vector2, ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground))
+            {
+                this.BuildEventSearchTextBox();
+            }
+
+            ImGui.EndChildFrame();
+        }
+
+        private void BuildEventRangeCombo(EventTimeframe selectedTimeFrame)
+        {
+            IEnumerable<EventTimeframe> eventTimeFrames = System.Enum.GetValues(typeof(EventTimeframe)).Cast<EventTimeframe>();
+            ImGui.Text(ComboEventRangeTitle);
+            ImGui.SameLine();
+
+            // has to be non empty or the entire thing won't show.
+            if (ImGui.BeginCombo(" ", selectedTimeFrame.GetDescription()))
+            {
+                foreach (EventTimeframe timeFrame in eventTimeFrames)
+                {
+                    if (ImGui.Selectable(timeFrame.GetDescription(), this.configuration.EventTimeframe == timeFrame))
+                    {
+                        this.configuration.EventTimeframe = timeFrame;
+                        this.eventsService.FilterEvents();
+                        this.configuration.Save();
+                    }
+                }
+
+                ImGui.EndCombo();
+            }
+        }
+
+        private void BuildEventSearchTextBox()
+        {
+            uint buf = 64;
+
+            ImGui.Text(TextBoxSearchTitle);
+            ImGui.SameLine();
+            ImGui.InputText(" ", this.TextBuffer, buf);
         }
 
         private void LoadConfigureSettings()
@@ -758,7 +754,6 @@ namespace FFXIVRPCalendarPlugin.UI
                            else
                            {
                                this.ESRBRatings = t.Result;
-                               this.detailsUI.ESRBRatings = t.Result;
                            }
                        }));
 
@@ -780,7 +775,6 @@ namespace FFXIVRPCalendarPlugin.UI
                         else
                         {
                             this.EventCategories = t.Result;
-                            this.detailsUI.EventCategories = t.Result;
                         }
                     }));
             }

@@ -24,7 +24,7 @@ namespace FFXIVRPCalendarPlugin.Services
     /// </summary>
     public class EventsService : IDisposable
     {
-        private const uint REFRESHINTERVAL = 15 * 60;
+        private const uint RefreshInterval = 15 * 60;
 
         private readonly Configuration configuration;
 
@@ -40,7 +40,6 @@ namespace FFXIVRPCalendarPlugin.Services
         public EventsService(Configuration configuration)
         {
             this.configuration = configuration;
-            Plugin.ClientState.TerritoryChanged += this.OnTerritoryChanged;
         }
 
         /// <summary>
@@ -85,7 +84,7 @@ namespace FFXIVRPCalendarPlugin.Services
             if (this.lastRefresh.HasValue)
             {
                 TimeSpan sinceLastRefresh = DateTime.UtcNow - this.lastRefresh.Value;
-                if (sinceLastRefresh.TotalSeconds >= REFRESHINTERVAL)
+                if (sinceLastRefresh.TotalSeconds >= RefreshInterval)
                 {
                     forceRefresh = true;
                 }
@@ -219,20 +218,10 @@ namespace FFXIVRPCalendarPlugin.Services
             {
                 if (disposing)
                 {
-                    Plugin.ClientState.TerritoryChanged -= this.OnTerritoryChanged;
+                    // TODO: unregister events, etc. here.
                 }
 
                 this.disposedValue = true;
-            }
-        }
-
-        private void OnTerritoryChanged(object? sender, ushort args)
-        {
-            if (Plugin.ClientState.LocalPlayer?.CurrentWorld?.Id != this.lastServerId)
-            {
-                this.FilteredEvents = null;
-                this.FilterEvents();
-                this.lastServerId = Plugin.ClientState.LocalPlayer?.CurrentWorld?.Id;
             }
         }
 
