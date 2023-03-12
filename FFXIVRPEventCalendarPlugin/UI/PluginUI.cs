@@ -39,7 +39,6 @@ namespace FFXIVRPCalendarPlugin.UI
 
         private readonly EventsService eventsService;
         private readonly Configuration configuration;
-        private readonly SettingsUI settingsUI;
         private readonly DebugUI debugUI;
         private bool visible = false;
         private bool isLoading = false;
@@ -52,8 +51,7 @@ namespace FFXIVRPCalendarPlugin.UI
         public PluginUI(Configuration configuration)
         {
             this.configuration = configuration;
-            this.LoadConfigureSettings();
-            this.settingsUI = new SettingsUI(configuration);
+            this.LoadConfiguration();
             this.debugUI = new DebugUI();
             this.eventsService = new EventsService(configuration);
         }
@@ -79,30 +77,6 @@ namespace FFXIVRPCalendarPlugin.UI
         {
             get { return this.visible; }
             set { this.visible = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the SettingsUI is visible.
-        /// </summary>
-        public bool SettingsVisible
-        {
-            get
-            {
-                if (this.settingsUI != null)
-                {
-                    return this.settingsUI.Visible;
-                }
-
-                return false;
-            }
-
-            set
-            {
-                if (this.settingsUI != null)
-                {
-                    this.settingsUI.Visible = value;
-                }
-            }
         }
 
         /// <summary>
@@ -188,7 +162,6 @@ namespace FFXIVRPCalendarPlugin.UI
             // There are other ways to do this, but it is generally best to keep the number of
             // draw delegates as low as possible.
             this.DrawMainWindow();
-            this.settingsUI.Draw();
             this.debugUI.Draw();
         }
 
@@ -202,11 +175,6 @@ namespace FFXIVRPCalendarPlugin.UI
             {
                 if (disposing)
                 {
-                    if (this.settingsUI != null)
-                    {
-                        this.settingsUI.Dispose();
-                    }
-
                     if (this.eventsService != null)
                     {
                         this.eventsService.Dispose();
@@ -547,6 +515,7 @@ namespace FFXIVRPCalendarPlugin.UI
                 ImGui.Separator();
                 this.BuildCategoryOptions();
                 ImGui.Separator();
+                ImGui.Separator();
             }
         }
 
@@ -763,7 +732,7 @@ namespace FFXIVRPCalendarPlugin.UI
             ImGui.InputText(" ", this.TextBuffer, buf);
         }
 
-        private void LoadConfigureSettings()
+        private void LoadConfiguration()
         {
             if (!this.isLoading)
             {

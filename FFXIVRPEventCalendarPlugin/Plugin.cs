@@ -43,7 +43,6 @@ namespace FFXIVRPCalendarPlugin
             this.BuildCommands();
 
             this.PluginInterface.UiBuilder.Draw += this.DrawUI;
-            this.PluginInterface.UiBuilder.OpenConfigUi += this.DrawConfigUI;
         }
 
         /// <summary>
@@ -127,11 +126,6 @@ namespace FFXIVRPCalendarPlugin
         private void DrawUI()
         {
             this.PluginUi.Draw();
-        }
-
-        private void DrawConfigUI()
-        {
-            this.PluginUi.SettingsVisible = true;
         }
     }
 }
