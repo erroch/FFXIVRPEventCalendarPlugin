@@ -36,5 +36,11 @@ namespace FFXIVRPCalendarPlugin.Models
         /// </summary>
         [Description("This week's events")]
         ThisWeek = 3,
+
+        /// <summary>
+        /// Show only events that are happening this week.
+        /// </summary>
+        [Description("Next week's events")]
+        NextWeek = 4,
     }
 }
