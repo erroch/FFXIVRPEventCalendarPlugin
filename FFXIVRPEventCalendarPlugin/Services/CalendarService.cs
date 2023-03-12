@@ -119,7 +119,7 @@ namespace FFXIVRPCalendarPlugin.Services
         /// </summary>
         /// <param name="configuration">The <see cref="Configuration"/> containing API information.</param>
         /// <returns>A list of <see cref="RPEvent"/>. for the current day.</returns>
-        public static async Task<List<RPEvent>> GetToday(Configuration configuration)
+        public static async Task<List<RPEvent>> GetEvents(Configuration configuration)
         {
             await MaybeUpdateCache(configuration.ApiAddress).ConfigureAwait(false);
             return RPEvents;

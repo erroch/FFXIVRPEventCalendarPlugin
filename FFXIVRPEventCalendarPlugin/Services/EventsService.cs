@@ -101,7 +101,7 @@ namespace FFXIVRPCalendarPlugin.Services
 
                 try
                 {
-                    Task<List<RPEvent>?>.Run(async () => await CalendarService.GetToday(this.configuration)
+                    Task<List<RPEvent>?>.Run(async () => await CalendarService.GetEvents(this.configuration)
                         .ContinueWith(
                             t =>
                             {
@@ -247,6 +247,7 @@ namespace FFXIVRPCalendarPlugin.Services
                 EventTimeframe.NextHours => new DateRange(DateTime.UtcNow, DateTime.UtcNow.AddHours(1)),
                 EventTimeframe.Today => this.GetTodayRange(),
                 EventTimeframe.ThisWeek => this.GetThisWeekRange(),
+                EventTimeframe.NextWeek => this.GetNextWeekRange(),
                 _ => this.GetTodayRange(),
             };
         }
@@ -262,6 +263,24 @@ namespace FFXIVRPCalendarPlugin.Services
         private DateRange GetThisWeekRange()
         {
             DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, this.configuration.TimeZoneInfo);
+            DateTime startLocal = nowLocal.AddDays((-1 * (int)nowLocal.DayOfWeek) + 1).Date;
+
+            // Our week starts on Monday.
+            if (nowLocal.DayOfWeek == DayOfWeek.Sunday)
+            {
+                startLocal = startLocal.AddDays(-7);
+            }
+
+            DateTime endLocal = startLocal.AddDays(6);
+
+            DateTime startUTC = TimeZoneInfo.ConvertTimeToUtc(startLocal, this.configuration.TimeZoneInfo);
+            DateTime endUTC = TimeZoneInfo.ConvertTimeToUtc(endLocal.AddDays(1), this.configuration.TimeZoneInfo);
+            return new DateRange(startUTC, endUTC);
+        }
+
+        private DateRange GetNextWeekRange()
+        {
+            DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, this.configuration.TimeZoneInfo).AddDays(7);
             DateTime startLocal = nowLocal.AddDays((-1 * (int)nowLocal.DayOfWeek) + 1).Date;
 
             // Our week starts on Monday.
