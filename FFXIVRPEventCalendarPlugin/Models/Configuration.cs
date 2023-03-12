@@ -30,11 +30,6 @@ namespace FFXIVRPCalendarPlugin.Models
         public int Version { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets a value indicating whether to use the time zone local to the user for event translations.
-        /// </summary>
-        public bool UseLocalTimeZone { get; set; } = true;
-
-        /// <summary>
         /// Gets or sets the root URL of the event calendar's API.
         /// </summary>
         public string ApiAddress { get; set; } = DefaultApiURL;
@@ -88,7 +83,6 @@ namespace FFXIVRPCalendarPlugin.Models
             this.Ratings = new List<string>(new string[] { "Teen" });
             this.TimeZoneInfo = TimeZoneInfo.Local;
             this.ApiAddress = DefaultApiURL;
-            this.UseLocalTimeZone = true;
         }
     }
 }

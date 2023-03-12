@@ -35,6 +35,7 @@ namespace FFXIVRPCalendarPlugin.UI
 
         private const string ComboEventRangeTitle = "Event Range: ";
         private const string TextBoxSearchTitle = "Search: ";
+        private const string TimeZoneSelectionTitle = "Timezone: ";
 
         private readonly EventsService eventsService;
         private readonly Configuration configuration;
@@ -275,19 +276,6 @@ namespace FFXIVRPCalendarPlugin.UI
         {
             if (ImGui.BeginChild("##EventListPane", new Vector2(-1, -1), true))
             {
-                TimeZoneInfo timeZoneInfo = TimeZoneInfo.Local;
-
-                ImGui.Text($"Local Time Zone: {timeZoneInfo.DisplayName} Current Offset: {timeZoneInfo.GetUtcOffset(DateTime.UtcNow)}");
-
-                ImGui.Spacing();
-
-                if (this.configuration.TimeZoneInfo != TimeZoneInfo.Local)
-                {
-                    ImGui.Text($"Overriding with Configured Time Zone: {this.configuration.TimeZoneInfo.DisplayName}");
-                }
-
-                ImGui.Separator();
-
                 this.BuildOptions();
 
                 ImGui.Text("Event Lists");
@@ -310,26 +298,39 @@ namespace FFXIVRPCalendarPlugin.UI
                     if (ImGui.BeginTabItem("Data Center"))
                     {
                         ImGui.Text("Current Data Center Events");
-                        List<RPEvent>? serverEvents = this.eventsService.DatacenterEvents;
+                        List<RPEvent>? dataCenterEvents = this.eventsService.DatacenterEvents;
                         if (Encoding.Default.GetString(this.TextBuffer) != string.Empty)
                         {
-                            serverEvents = SearchEvents(serverEvents, Encoding.Default.GetString(this.TextBuffer));
+                            dataCenterEvents = SearchEvents(dataCenterEvents, Encoding.Default.GetString(this.TextBuffer));
                         }
 
-                        this.BuildEventTable(serverEvents, "##DatacenterEvents");
+                        this.BuildEventTable(dataCenterEvents, "##DatacenterEvents");
                         ImGui.EndTabItem();
                     }
 
                     if (ImGui.BeginTabItem("Region"))
                     {
                         ImGui.Text("Current Region Events");
-                        List<RPEvent>? serverEvents = this.eventsService.RegionEvents;
+                        List<RPEvent>? regionEvents = this.eventsService.RegionEvents;
                         if (Encoding.Default.GetString(this.TextBuffer) != string.Empty)
                         {
-                            serverEvents = SearchEvents(serverEvents, Encoding.Default.GetString(this.TextBuffer));
+                            regionEvents = SearchEvents(regionEvents, Encoding.Default.GetString(this.TextBuffer));
                         }
 
-                        this.BuildEventTable(serverEvents, "##RegionEvents");
+                        this.BuildEventTable(regionEvents, "##RegionEvents");
+                        ImGui.EndTabItem();
+                    }
+
+                    if (ImGui.BeginTabItem("All"))
+                    {
+                        ImGui.Text("All FFXIV RP Events");
+                        List<RPEvent>? allEvents = this.eventsService.FilteredEvents;
+                        if (Encoding.Default.GetString(this.TextBuffer) != string.Empty)
+                        {
+                            allEvents = SearchEvents(allEvents, Encoding.Default.GetString(this.TextBuffer));
+                        }
+
+                        this.BuildEventTable(allEvents, "##AllEvents");
                         ImGui.EndTabItem();
                     }
 
@@ -540,6 +541,8 @@ namespace FFXIVRPCalendarPlugin.UI
         {
             if (ImGui.CollapsingHeader("Options"))
             {
+                this.BuildTimeZoneCombo();
+                ImGui.Separator();
                 this.BuildESRBOptions();
                 ImGui.Separator();
                 this.BuildCategoryOptions();
@@ -716,6 +719,38 @@ namespace FFXIVRPCalendarPlugin.UI
                 }
 
                 ImGui.EndCombo();
+            }
+        }
+
+        private void BuildTimeZoneCombo()
+        {
+            IEnumerable<TimeZoneInfo> timeZoneInfos = TimeZoneInfo.GetSystemTimeZones();
+            ImGui.Text(TimeZoneSelectionTitle);
+            ImGui.SameLine();
+
+            if (ImGui.BeginCombo(" ", this.configuration.TimeZoneInfo.DisplayName))
+            {
+                foreach (TimeZoneInfo timeZoneInfo in timeZoneInfos)
+                {
+                    if (ImGui.Selectable(
+                        timeZoneInfo.DisplayName,
+                        this.configuration.TimeZoneInfo == timeZoneInfo))
+                    {
+                        this.configuration.TimeZoneInfo = timeZoneInfo;
+                        this.eventsService.FilterEvents();
+                        this.configuration.Save();
+                    }
+                }
+
+                ImGui.EndCombo();
+            }
+
+            ImGui.SameLine();
+            if (ImGui.Button("Set to Local Timezone"))
+            {
+                this.configuration.TimeZoneInfo = TimeZoneInfo.Local;
+                this.eventsService.FilterEvents();
+                this.configuration.Save();
             }
         }
 

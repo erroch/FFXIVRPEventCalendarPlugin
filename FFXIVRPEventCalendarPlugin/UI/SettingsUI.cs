@@ -18,12 +18,14 @@ namespace FFXIVRPCalendarPlugin.UI
     using FFXIVRPCalendarPlugin.Services;
 
     using ImGuiNET;
+    using Lumina.Excel.GeneratedSheets;
 
     /// <summary>
     /// The Settings UI.
     /// </summary>
     public class SettingsUI : IDisposable
     {
+        private const string TimeZoneSelectionTitle = "Timezone: ";
         private readonly Configuration configuration;
         private bool disposedValue;
         private bool visible = false;
@@ -80,28 +82,7 @@ namespace FFXIVRPCalendarPlugin.UI
                 ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollWithMouse))
             {
                 // can't ref a property, so use a local copy
-                bool useLocalTime = this.configuration.UseLocalTimeZone;
-
-                if (ImGui.Checkbox("Use Local Time Zone", ref useLocalTime))
-                {
-                    this.configuration.UseLocalTimeZone = useLocalTime;
-
-                    // can save immediately on change, if you don't want to provide a "Save and Close" button
-                    this.configuration.Save();
-                }
-
-                byte[] buffer = System.Text.Encoding.ASCII.GetBytes(this.configuration.TimeZoneInfo.DisplayName.PadRight(255, ' '));
-                if (ImGui.InputText("Alternate Timzeone", buffer, 256))
-                {
-                    string alternateTimezone = System.Text.Encoding.Default.GetString(buffer);
-                    TimeZoneInfo timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(alternateTimezone);
-                    if (timeZoneInfo != null)
-                    {
-                        this.configuration.TimeZoneInfo = timeZoneInfo;
-                    }
-
-                    this.configuration.Save();
-                }
+                this.BuildTimezone();
 
                 byte[] urlBuffer = System.Text.Encoding.ASCII.GetBytes(this.configuration.ApiAddress.PadRight(255, ' '));
                 if (ImGui.InputText("URL", urlBuffer, 256))
@@ -113,6 +94,29 @@ namespace FFXIVRPCalendarPlugin.UI
             }
 
             ImGui.End();
+        }
+
+        private void BuildTimezone()
+        {
+            IEnumerable<TimeZoneInfo> timeZoneInfos = TimeZoneInfo.GetSystemTimeZones();
+            ImGui.Text(TimeZoneSelectionTitle);
+            ImGui.SameLine();
+
+            if (ImGui.BeginCombo(" ", this.configuration.TimeZoneInfo.DisplayName))
+            {
+                foreach (TimeZoneInfo timeZoneInfo in timeZoneInfos)
+                {
+                    if (ImGui.Selectable(
+                        timeZoneInfo.DisplayName,
+                        this.configuration.TimeZoneInfo == timeZoneInfo))
+                    {
+                        this.configuration.TimeZoneInfo = timeZoneInfo;
+                        this.configuration.Save();
+                    }
+                }
+
+                ImGui.EndCombo();
+            }
         }
 
         /// <summary>

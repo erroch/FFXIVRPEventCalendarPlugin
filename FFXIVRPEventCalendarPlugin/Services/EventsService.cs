@@ -71,9 +71,12 @@ namespace FFXIVRPCalendarPlugin.Services
         /// </summary>
         public List<RPEvent>? RegionEvents { get; internal set; }
 
-        private List<RPEvent>? RoleplayEvents { get; set; }
+        /// <summary>
+        /// Gets a list of all roleplay events filtered by date range and filter options.
+        /// </summary>
+        public List<RPEvent>? FilteredEvents { get; internal set; }
 
-        private List<RPEvent>? FilteredEvents { get; set; }
+        private List<RPEvent>? RoleplayEvents { get; set; }
 
         /// <summary>
         /// Refresh the event list.
