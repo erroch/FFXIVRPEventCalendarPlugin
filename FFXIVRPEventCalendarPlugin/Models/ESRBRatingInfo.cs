@@ -34,6 +34,7 @@ namespace FFXIVRPCalendarPlugin.Models
         /// <summary>
         /// Gets or sets a value indicating whether this event requires the user to be age verified.
         /// </summary>
+        /// <remarks>Any event requiring age validation will not be displayed in the plugin.</remarks>
         public bool RequiresAgeValidation { get; set; }
     }
 }
