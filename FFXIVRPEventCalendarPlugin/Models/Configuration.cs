@@ -30,9 +30,9 @@ namespace FFXIVRPCalendarPlugin.Models
         public int Version { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the root URL of the event calendar's API.
+        /// Gets the root URL of the event calendar's API.
         /// </summary>
-        public string ApiAddress { get; set; } = DefaultApiURL;
+        public string ApiAddress { get; } = DefaultApiURL;
 
         /// <summary>
         /// Gets or sets the time zone to be used when translating event start/end dates and determing the stand and end of 'today'.
@@ -82,7 +82,6 @@ namespace FFXIVRPCalendarPlugin.Models
             this.Categories = null;
             this.Ratings = new List<string>(new string[] { "Teen" });
             this.TimeZoneInfo = TimeZoneInfo.Local;
-            this.ApiAddress = DefaultApiURL;
         }
     }
 }

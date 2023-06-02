@@ -20,9 +20,9 @@ namespace FFXIVRPCalendarPlugin.Models
         Now = 0,
 
         /// <summary>
-        /// Show only events that are open or are opening within the next hour.
+        /// Show only events that will open within the next hour.
         /// </summary>
-        [Description("Events open in the next hour")]
+        [Description("Events opening in the next hour")]
         NextHours = 1,
 
         /// <summary>

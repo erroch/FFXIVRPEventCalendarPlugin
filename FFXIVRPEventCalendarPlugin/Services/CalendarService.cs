@@ -10,13 +10,10 @@ namespace FFXIVRPCalendarPlugin.Services
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
-    using System.Text;
     using System.Threading.Tasks;
-    using Dalamud.Configuration;
     using Dalamud.Logging;
 
     using FFXIVRPCalendarPlugin.Models;
-    using FFXIVRPCalendarPlugin.Models.Mock;
     using Newtonsoft.Json;
 
     /// <summary>
