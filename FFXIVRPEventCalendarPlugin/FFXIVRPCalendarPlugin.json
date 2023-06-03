@@ -4,7 +4,7 @@
   "Punchline": "Want to know what's going in in roleplay today?",
   "Description": "An in game portal to the FFXIV RP Event Calendar (https://ffxiv-rp.org).  Use /events to bring up the list of roleplay events happening this week.",
   "RepoUrl": "https://github.com/erroch/FFXIVRPEventCalendarPlugin",
-  "InternalName": "FFXIVRPEventCalendarPlugin",
+  "InternalName": "FFXIVRPCalendarPlugin",
   "ApplicableVersion": "any",
   "Tags": [
     "roleplay",
