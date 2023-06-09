@@ -200,6 +200,7 @@ namespace FFXIVRPCalendarPlugin.UI
             }
 
             const float detailsWidth = 320f;
+            const float eventListWidth = 900f - detailsWidth;
 
             this.eventsService.RefreshEvents();
             ImGui.SetNextWindowSize(new Vector2(900, 600), ImGuiCond.FirstUseEver);
@@ -210,7 +211,7 @@ namespace FFXIVRPCalendarPlugin.UI
                 {
                     if (ImGui.BeginTable("##mainSizingTable", 2, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.Resizable | ImGuiTableFlags.BordersInnerV))
                     {
-                        ImGui.TableSetupColumn("##eventListColumn", ImGuiTableColumnFlags.WidthStretch);
+                        ImGui.TableSetupColumn("##eventListColumn", ImGuiTableColumnFlags.WidthStretch, eventListWidth);
                         ImGui.TableSetupColumn("##detailListColumn", ImGuiTableColumnFlags.WidthStretch, detailsWidth);
                         ImGui.TableNextRow();
 
@@ -596,13 +597,35 @@ namespace FFXIVRPCalendarPlugin.UI
                         .ToList();
                 }
 
-                int itemCount = 0;
+                ImGuiStylePtr stylePtr = ImGui.GetStyle();
+
+                float windowWidth = ImGui.GetWindowWidth();
+                float itemSpacing = stylePtr.ItemSpacing.X;
+                float paddingSize = 0;
+                float currentWidth = 0;
+
+                bool first = true;
 
                 foreach (EventCategoryInfo category in this.EventCategories)
                 {
                     if (category.CategoryName != null)
                     {
                         bool check = this.configuration.Categories.Contains(category.CategoryName);
+                        float elementWidth = ImGui.CalcTextSize(category.CategoryName).X + paddingSize;
+
+                        if (!first)
+                        {
+                            if (currentWidth + elementWidth >= windowWidth)
+                            {
+                                currentWidth = elementWidth;
+                            }
+                            else
+                            {
+                                ImGui.SameLine();
+                                currentWidth += elementWidth;
+                            }
+                        }
+
                         if (ImGui.Checkbox(category.CategoryName, ref check))
                         {
                             if (check)
@@ -624,20 +647,17 @@ namespace FFXIVRPCalendarPlugin.UI
                             this.eventsService.FilterEvents();
                         }
 
+                        if (first)
+                        {
+                            currentWidth = ImGui.GetItemRectSize().X + ImGuiUtilities.GetTooltipSize() + (stylePtr.ItemSpacing.X * 2);
+                            paddingSize = currentWidth - elementWidth;
+                            first = false;
+                        }
+
                         if (category.Description != null)
                         {
                             ImGui.SameLine();
                             ImGuiUtilities.BuildToolTip(category.Description);
-                        }
-
-                        if (itemCount >= 5)
-                        {
-                            itemCount = 0;
-                        }
-                        else
-                        {
-                            itemCount++;
-                            ImGui.SameLine();
                         }
                     }
                 }

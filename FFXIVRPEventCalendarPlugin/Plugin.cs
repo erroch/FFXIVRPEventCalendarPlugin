@@ -90,8 +90,6 @@ namespace FFXIVRPCalendarPlugin
         public void Dispose()
         {
             this.PluginUi.Dispose();
-            Plugin.CommandManager.RemoveHandler("/eventsnow");
-            Plugin.CommandManager.RemoveHandler("/eventsnext");
             Plugin.CommandManager.RemoveHandler("/events");
             Plugin.CommandManager.RemoveHandler("/resetcalendar");
             Plugin.CommandManager.RemoveHandler("/eventsdebug");
@@ -99,8 +97,6 @@ namespace FFXIVRPCalendarPlugin
 
         private void BuildCommands()
         {
-            Plugin.CommandManager.AddHandler("/eventsnow", new CommandInfo(this.OnCommand) { HelpMessage = "Get RP events happening now." });
-            Plugin.CommandManager.AddHandler("/eventsnext", new CommandInfo(this.OnCommand) { HelpMessage = "Get the next 5 events on my datacenter. (or /eventsnext x for x events up to 25.)" });
             Plugin.CommandManager.AddHandler("/events", new CommandInfo(this.OnCommand) { HelpMessage = "Show the RP Calendar UI." });
             Plugin.CommandManager.AddHandler("/resetcalendar", new CommandInfo(this.OnCommand) { ShowInHelp = false });
             Plugin.CommandManager.AddHandler("/eventsdebug", new CommandInfo(this.OnCommand) { ShowInHelp = false });
