@@ -36,6 +36,15 @@ namespace FFXIVRPCalendarPlugin.UI
         }
 
         /// <summary>
+        /// Get the size of the tooltip mouseover indicator.
+        /// </summary>
+        /// <returns>A float indicating the size of the tooltip.</returns>
+        public static float GetTooltipSize()
+        {
+            return ImGui.CalcTextSize("(?)").X;
+        }
+
+        /// <summary>
         /// Open a browser window to the provided URL.
         /// </summary>
         /// <param name="url">The URL to open.</param>
