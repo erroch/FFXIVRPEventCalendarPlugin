@@ -236,6 +236,30 @@ namespace FFXIVRPCalendarPlugin.UI
                 {
                     this.eventsService.RefreshEvents(forceRefresh: true);
                 }
+
+                string myUrl = "https://xiv.page.link/new";
+                ImGui.SameLine();
+                ImGui.Text($"Add a new Event");
+                ImGui.SameLine();
+                ImGui.PushID(1);
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.Globe))
+                {
+                    ImGuiUtilities.OpenBrowser(myUrl);
+                }
+
+                ImGui.PopID();
+
+                string reportUrl = "https://xiv.page.link/report";
+                ImGui.SameLine();
+                ImGui.Text($"Report an Inaccurate Event");
+                ImGui.SameLine();
+                ImGui.PushID(2);
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.Globe))
+                {
+                    ImGuiUtilities.OpenBrowser(reportUrl);
+                }
+
+                ImGui.PopID();
             }
 
             ImGui.End();

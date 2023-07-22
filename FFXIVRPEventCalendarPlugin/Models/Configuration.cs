@@ -25,6 +25,11 @@ namespace FFXIVRPCalendarPlugin.Models
         private DalamudPluginInterface? pluginInterface;
 
         /// <summary>
+        /// Gets or sets a value indicating whether the user has seen the first time information.
+        /// </summary>
+        public bool FirstTimeInfoShown { get; set; } = false;
+
+        /// <summary>
         /// Gets or sets the Version number.
         /// </summary>
         public int Version { get; set; } = 0;
