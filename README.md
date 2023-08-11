@@ -24,6 +24,6 @@ Please note, the calendar caters only to primarially roleplaying events of a non
 
 If you are interested in contributing to the plugin or assist with the calendar please email at ffxiv.rp.events@gmail.com.
 
-### Knwon Issues
+### Known Issues
 
 This is currently under development.  Expect wonkiness and frequent changes.
