@@ -15,7 +15,7 @@ namespace FFXIVRPCalendarPlugin
     using Dalamud.Game.Gui;
     using Dalamud.IoC;
     using Dalamud.Plugin;
-
+    using Dalamud.Plugin.Services;
     using FFXIVRPCalendarPlugin.Models;
 
     using FFXIVRPCalendarPlugin.UI;
@@ -50,28 +50,28 @@ namespace FFXIVRPCalendarPlugin
         /// </summary>
         [PluginService]
         [RequiredVersion("1.0")]
-        public static ClientState ClientState { get; private set; } = null!;
+        public static IClientState ClientState { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud Data Manger.
         /// </summary>
         [PluginService]
         [RequiredVersion("1.0")]
-        public static DataManager DataManager { get; private set; } = null!;
+        public static IDataManager DataManager { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud Command Manager.
         /// </summary>
         [PluginService]
         [RequiredVersion("1.0")]
-        public static CommandManager CommandManager { get; private set; } = null!;
+        public static ICommandManager CommandManager { get; private set; } = null!;
 
         /// <summary>
         /// Gets the FFXIV Chat Gui.
         /// </summary>
         [PluginService]
         [RequiredVersion("1.0")]
-        public static ChatGui ChatGui { get; private set; } = null!;
+        public static IChatGui ChatGui { get; private set; } = null!;
 
         /// <summary>
         /// Gets the provided name of the plugin.
