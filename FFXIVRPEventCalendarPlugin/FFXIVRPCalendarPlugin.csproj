@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors>erroch</Authors>
     <Company></Company>
-    <Version>1.0.1.0</Version>
+    <Version>1.0.1.1</Version>
     <Description>An in game portal to the FFXIV RP Event Calendar.</Description>
     <PackageProjectUrl>https://github.com/erroch/FFXIVRPEventCalendarPlugin</PackageProjectUrl>
   </PropertyGroup>
