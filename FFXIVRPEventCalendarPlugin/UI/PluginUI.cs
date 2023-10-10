@@ -17,6 +17,7 @@ namespace FFXIVRPCalendarPlugin.UI
     using Dalamud.Game.Gui;
     using Dalamud.Interface;
     using Dalamud.Interface.Components;
+    using Dalamud.Interface.Utility;
     using Dalamud.IoC;
 
     using FFXIVRPCalendarPlugin;
