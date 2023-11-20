@@ -74,6 +74,13 @@ namespace FFXIVRPCalendarPlugin
         public static IChatGui ChatGui { get; private set; } = null!;
 
         /// <summary>
+        /// Gets the Dalamud Plugin Log.
+        /// </summary>
+        [PluginService]
+        [RequiredVersion("1.0")]
+        public static IPluginLog PluginLog { get; private set; } = null!;
+
+        /// <summary>
         /// Gets the provided name of the plugin.
         /// </summary>
         public string Name => "FFXIV RP Event Calendar";
