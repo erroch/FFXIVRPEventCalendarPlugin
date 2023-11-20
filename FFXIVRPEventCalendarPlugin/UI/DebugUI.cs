@@ -140,7 +140,7 @@ namespace FFXIVRPCalendarPlugin.UI
             }
             catch (Exception ex)
             {
-                PluginLog.LogError(ex, ex.Message);
+                Plugin.PluginLog.Error(ex, ex.Message);
                 Plugin.ChatGui.PrintError($"RPEventCalendar: DebugIU: {ex.Message}");
             }
 

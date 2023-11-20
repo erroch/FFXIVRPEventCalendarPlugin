@@ -126,7 +126,7 @@ namespace FFXIVRPCalendarPlugin.Services
                 }
                 catch (Exception ex)
                 {
-                    PluginLog.LogError(ex, ex.Message);
+                    Plugin.PluginLog.Error(ex, ex.Message);
                     Plugin.ChatGui.PrintError($"error fetching events: {ex.Message}");
                 }
             }

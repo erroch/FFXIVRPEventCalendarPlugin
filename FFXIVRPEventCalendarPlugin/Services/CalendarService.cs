@@ -65,7 +65,7 @@ namespace FFXIVRPCalendarPlugin.Services
                 }
                 catch (Exception ex)
                 {
-                    PluginLog.LogError(ex, ex.Message);
+                    Plugin.PluginLog.Error(ex, ex.Message);
                     throw new Exception($"URL: {url}: ex: {ex.Message}");
                 }
             }
@@ -103,7 +103,7 @@ namespace FFXIVRPCalendarPlugin.Services
                 }
                 catch (Exception ex)
                 {
-                    PluginLog.LogError(ex, ex.Message);
+                    Plugin.PluginLog.Error(ex, ex.Message);
                     throw new Exception($"URL: {url}: ex: {ex.Message}");
                 }
             }
