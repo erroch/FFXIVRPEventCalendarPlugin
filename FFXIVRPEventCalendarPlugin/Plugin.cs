@@ -13,6 +13,7 @@ namespace FFXIVRPCalendarPlugin
     using Dalamud.Game.ClientState;
     using Dalamud.Game.Command;
     using Dalamud.Game.Gui;
+    using Dalamud.Interface;
     using Dalamud.IoC;
     using Dalamud.Plugin;
     using Dalamud.Plugin.Services;
@@ -43,6 +44,7 @@ namespace FFXIVRPCalendarPlugin
             this.BuildCommands();
 
             this.PluginInterface.UiBuilder.Draw += this.DrawUI;
+            this.PluginInterface.UiBuilder.OpenMainUi += this.OpenMainUi;
         }
 
         /// <summary>
@@ -130,5 +132,7 @@ namespace FFXIVRPCalendarPlugin
         {
             this.PluginUi.Draw();
         }
+
+        private void OpenMainUi() => this.PluginUi.Visible = true;
     }
 }
