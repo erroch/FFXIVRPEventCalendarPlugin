@@ -152,12 +152,22 @@ namespace FFXIVRPCalendarPlugin.Services
                     .Where(x =>
                         (this.configuration.Categories is null || this.configuration.Categories.Contains(x.EventCategory)) &&
                         (this.configuration.Ratings is null || this.configuration.Ratings.Contains(x.ESRBRating)) &&
+                        (!this.configuration.OneTimeEventsOnly || !x.IsRecurring) &&
+                        (this.configuration.ShowRealGilEvents || !x.IsRealGilEvent) &&
                         (
                             (this.configuration.EventTimeframe == EventTimeframe.Now && x.StartTimeUTC <= DateTime.UtcNow && x.EndTimeUTC >= DateTime.UtcNow) ||
                             (x.StartTimeUTC >= dateRange.StartDateUTC && x.StartTimeUTC <= dateRange.EndDateUTC)))
                     .Select(x =>
                     {
                         RPEvent result = x;
+                        if (x.IsRealGilEvent)
+                        {
+                            if (x.EventName != null && x.EventName.Contains("[$]") == false)
+                            {
+                                x.EventName = "[$] " + x.EventName;
+                            }
+                        }
+
                         result.LocalStartTime = TimeZoneInfo.ConvertTimeFromUtc(result.StartTimeUTC, this.configuration.TimeZoneInfo);
                         result.LocalEndTime = TimeZoneInfo.ConvertTimeFromUtc(result.EndTimeUTC, this.configuration.TimeZoneInfo);
                         return x;

@@ -13,19 +13,15 @@ namespace FFXIVRPCalendarPlugin.UI
     using System.Text;
     using System.Threading.Tasks;
 
-    using Dalamud.Game.ClientState;
-    using Dalamud.Game.Gui;
     using Dalamud.Interface;
     using Dalamud.Interface.Components;
     using Dalamud.Interface.Utility;
-    using Dalamud.IoC;
 
     using FFXIVRPCalendarPlugin;
     using FFXIVRPCalendarPlugin.Models;
     using FFXIVRPCalendarPlugin.Services;
 
     using ImGuiNET;
-    using Newtonsoft.Json.Serialization;
 
     /// <summary>
     /// The primary plugin UI.
@@ -537,12 +533,51 @@ namespace FFXIVRPCalendarPlugin.UI
             {
                 this.BuildTimeZoneCombo();
                 ImGui.Separator();
+                ImGui.BeginTable("esrb_misc_option_split", 2, ImGuiTableFlags.NoSavedSettings | ImGuiTableFlags.NoBordersInBody);
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
                 this.BuildESRBOptions();
+                ImGui.TableNextColumn();
+                this.BuildMiscOptions();
+                ImGui.EndTable();
                 ImGui.Separator();
                 this.BuildCategoryOptions();
                 ImGui.Separator();
                 ImGui.Separator();
             }
+        }
+
+        private void BuildMiscOptions()
+        {
+            ImGui.Text("Misc Options:");
+            bool oneTimeOnly = this.configuration.OneTimeEventsOnly;
+            if (ImGui.Checkbox("One Time Events Only", ref oneTimeOnly))
+            {
+                if (oneTimeOnly != this.configuration.OneTimeEventsOnly)
+                {
+                    this.configuration.OneTimeEventsOnly = oneTimeOnly;
+                    this.configuration.Save();
+                    this.eventsService.FilterEvents();
+                }
+            }
+
+            ImGui.SameLine();
+            ImGuiUtilities.BuildToolTip("Show only events with no recurrence schedule.  This may also show events with special one time schedule changes that are out of the ordinary.");
+
+            ImGui.SameLine();
+            bool showRealGilEvents = this.configuration.ShowRealGilEvents;
+            if (ImGui.Checkbox("Show Real Gil Events", ref showRealGilEvents))
+            {
+                if (showRealGilEvents != this.configuration.ShowRealGilEvents)
+                {
+                    this.configuration.ShowRealGilEvents = showRealGilEvents;
+                    this.configuration.Save();
+                    this.eventsService.FilterEvents();
+                }
+            }
+
+            ImGui.SameLine();
+            ImGuiUtilities.BuildToolTip("Show events that use real or out-of-character gil in any fashion including menu items, services, raffles, giveaways, etc.");
         }
 
         private void BuildESRBOptions()
