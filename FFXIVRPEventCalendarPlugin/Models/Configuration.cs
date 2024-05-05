@@ -58,6 +58,16 @@ namespace FFXIVRPCalendarPlugin.Models
         public List<string>? Categories { get; set; } = null;
 
         /// <summary>
+        /// Gets or sets a value indicating whether only one time events are to be shown.
+        /// </summary>
+        public bool OneTimeEventsOnly { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether events using real/ooc gil are to be shown.
+        /// </summary>
+        public bool ShowRealGilEvents { get; set; } = false;
+
+        /// <summary>
         /// Gets or sets the timeframe of events to display.
         /// </summary>
         public EventTimeframe EventTimeframe { get; set; } = EventTimeframe.Today;
