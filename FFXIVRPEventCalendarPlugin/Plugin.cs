@@ -30,7 +30,7 @@ namespace FFXIVRPCalendarPlugin
         /// Initializes a new instance of the <see cref="Plugin"/> class.
         /// </summary>
         /// <param name="pluginInterface">The Dalamud plugin interface.</param>
-        public Plugin([RequiredVersion("1.0")] DalamudPluginInterface pluginInterface)
+        public Plugin(IDalamudPluginInterface pluginInterface)
         {
             this.PluginInterface = pluginInterface;
 
@@ -51,35 +51,30 @@ namespace FFXIVRPCalendarPlugin
         /// Gets the FFXIV client state.
         /// </summary>
         [PluginService]
-        [RequiredVersion("1.0")]
         public static IClientState ClientState { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud Data Manger.
         /// </summary>
         [PluginService]
-        [RequiredVersion("1.0")]
         public static IDataManager DataManager { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud Command Manager.
         /// </summary>
         [PluginService]
-        [RequiredVersion("1.0")]
         public static ICommandManager CommandManager { get; private set; } = null!;
 
         /// <summary>
         /// Gets the FFXIV Chat Gui.
         /// </summary>
         [PluginService]
-        [RequiredVersion("1.0")]
         public static IChatGui ChatGui { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud Plugin Log.
         /// </summary>
         [PluginService]
-        [RequiredVersion("1.0")]
         public static IPluginLog PluginLog { get; private set; } = null!;
 
         /// <summary>
@@ -87,7 +82,7 @@ namespace FFXIVRPCalendarPlugin
         /// </summary>
         public string Name => "FFXIV RP Event Calendar";
 
-        private DalamudPluginInterface PluginInterface { get; init; }
+        private IDalamudPluginInterface PluginInterface { get; init; }
 
         private Configuration Configuration { get; init; }
 
