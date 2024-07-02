@@ -22,7 +22,7 @@ namespace FFXIVRPCalendarPlugin.Models
 
         // the below exist just to make saving less cumbersome
         [NonSerialized]
-        private DalamudPluginInterface? pluginInterface;
+        private IDalamudPluginInterface? pluginInterface;
 
         /// <summary>
         /// Gets or sets a value indicating whether the user has seen the first time information.
@@ -76,7 +76,7 @@ namespace FFXIVRPCalendarPlugin.Models
         /// Initialize the Plugin interface.
         /// </summary>
         /// <param name="pluginInterface">The plugin interface provided from the primary Dalamud plugin.</param>
-        public void Initialize(DalamudPluginInterface pluginInterface)
+        public void Initialize(IDalamudPluginInterface pluginInterface)
         {
             this.pluginInterface = pluginInterface;
         }
