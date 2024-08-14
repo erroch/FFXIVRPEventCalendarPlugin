@@ -73,5 +73,17 @@ namespace FFXIVRPCalendarPlugin.UI
             float height = ImGui.GetTextLineHeightWithSpacing() * 1.3f;
             return new Vector2(width, height);
         }
+
+
+        /// <summary>
+        /// Sort column by time.
+        /// </summary>
+        /// <param name="timeA">The first time value.</param>
+        /// <param name="timeB">The Second time value.</param>
+        /// <returns>A sorted comparison.</returns>
+        public static int SortTime(DateTime timeA, DateTime timeB)
+        {
+            return timeA.CompareTo(timeB);
+        }
     }
 }

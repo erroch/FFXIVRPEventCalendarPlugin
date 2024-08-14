@@ -460,7 +460,7 @@ namespace FFXIVRPCalendarPlugin.UI
             }
         }
 
-        private void BuildEventTable(List<RPEvent>? eventList, string tableId)
+        private unsafe void BuildEventTable(List<RPEvent>? eventList, string tableId)
         {
             this.BuildEventFilters();
 
@@ -470,23 +470,83 @@ namespace FFXIVRPCalendarPlugin.UI
                 return;
             }
 
-            Vector2 outerSize = new (-1, -1);
+            Vector2 outerSize = new(-1, -1);
             if (ImGui.BeginTable(
                 tableId,
                 9,
-                ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.Hideable | ImGuiTableFlags.Resizable | ImGuiTableFlags.Reorderable | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.ScrollY,
+                ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.Hideable | ImGuiTableFlags.Resizable | ImGuiTableFlags.Reorderable | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Sortable,
                 outerSize))
             {
-                ImGui.TableSetupColumn("Server");
-                ImGui.TableSetupColumn("Datacenter", ImGuiTableColumnFlags.DefaultHide);
-                ImGui.TableSetupColumn("Start Time");
+                ImGui.TableSetupColumn("Server", ImGuiTableColumnFlags.DefaultSort);
+                ImGui.TableSetupColumn("Datacenter", ImGuiTableColumnFlags.DefaultHide | ImGuiTableColumnFlags.DefaultSort);
+                ImGui.TableSetupColumn("Start Time", ImGuiTableColumnFlags.DefaultSort);
                 ImGui.TableSetupColumn("End Time", ImGuiTableColumnFlags.DefaultHide);
-                ImGui.TableSetupColumn("Name");
-                ImGui.TableSetupColumn("Location");
-                ImGui.TableSetupColumn("URL");
-                ImGui.TableSetupColumn("Rating", ImGuiTableColumnFlags.DefaultHide);
-                ImGui.TableSetupColumn("Category");
+                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.DefaultSort);
+                ImGui.TableSetupColumn("Location", ImGuiTableColumnFlags.DefaultSort);
+                ImGui.TableSetupColumn("URL", ImGuiTableColumnFlags.NoSort);
+                ImGui.TableSetupColumn("Rating", ImGuiTableColumnFlags.DefaultHide | ImGuiTableColumnFlags.DefaultSort);
+                ImGui.TableSetupColumn("Category", ImGuiTableColumnFlags.DefaultSort);
                 ImGui.TableHeadersRow();
+
+                ImGuiTableSortSpecsPtr sortSpecs = ImGui.TableGetSortSpecs();
+                if (sortSpecs.NativePtr != null && sortSpecs.SpecsDirty)
+                {
+                    switch (sortSpecs.Specs.ColumnIndex)
+                    {
+                        case 0:
+                            eventList.Sort((a, b) => sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending
+                                ? string.Compare(a.Server, b.Server)
+                                : string.Compare(b.Server, a.Server));
+
+                            break;
+                        case 1:
+                            eventList.Sort((a, b) => sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending
+                                ? string.Compare(a.Datacenter, b.Datacenter)
+                                : string.Compare(b.Datacenter, a.Datacenter));
+
+                            break;
+                        case 2:
+                            eventList.Sort((a, b) => sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending
+                                ? ImGuiUtilities.SortTime(a.StartTimeUTC, b.StartTimeUTC)
+                                : ImGuiUtilities.SortTime(b.StartTimeUTC, a.StartTimeUTC));
+
+                            break;
+                        case 3:
+                            eventList.Sort((a, b) => sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending
+                                ? ImGuiUtilities.SortTime(a.EndTimeUTC, b.EndTimeUTC)
+                                : ImGuiUtilities.SortTime(b.EndTimeUTC, a.EndTimeUTC));
+
+                            break;
+                        case 4:
+                            eventList.Sort((a, b) => sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending
+                                ? string.Compare(a.EventName, b.EventName)
+                                : string.Compare(b.EventName, a.EventName));
+
+                            break;
+                        case 5:
+                            eventList.Sort((a, b) => sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending
+                                ? string.Compare(a.Location, b.Location)
+                                : string.Compare(b.Location, a.Location));
+
+                            break;
+                        case 6:
+                            break;
+                        case 7:
+                            eventList.Sort((a, b) => sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending
+                                ? string.Compare(a.ESRBRating, b.ESRBRating)
+                                : string.Compare(b.ESRBRating, a.ESRBRating));
+
+                            break;
+                        case 8:
+                            eventList.Sort((a, b) => sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending
+                                ? string.Compare(a.EventCategory, b.EventCategory)
+                                : string.Compare(b.EventCategory, a.EventCategory));
+
+                            break;
+                        default:
+                            break;
+                    }
+                }
 
                 int rowNumber = 0;
                 foreach (RPEvent myEvent in eventList)
