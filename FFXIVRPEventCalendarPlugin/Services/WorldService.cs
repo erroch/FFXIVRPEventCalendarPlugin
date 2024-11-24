@@ -12,7 +12,7 @@ namespace FFXIVRPCalendarPlugin.Services
 
     using FFXIVRPCalendarPlugin;
     using Lumina.Excel;
-    using Lumina.Excel.GeneratedSheets;
+    using Lumina.Excel.Sheets;
 
     /// <summary>
     /// Provides world and data center information.
@@ -79,7 +79,7 @@ namespace FFXIVRPCalendarPlugin.Services
         {
             if (Worlds != null)
             {
-                return Worlds.Where(x => x.Value.DataCenter.Row == datacenterId)
+                return Worlds.Where(x => x.Value.DataCenter.Value.RowId == datacenterId)
                     .Select(x => x.Key)
                     .ToArray();
             }
@@ -119,7 +119,7 @@ namespace FFXIVRPCalendarPlugin.Services
 
             if (Worlds != null)
             {
-                return Worlds.Where(x => datacenterIds.Contains(x.Value.DataCenter.Row))
+                return Worlds.Where(x => datacenterIds.Contains(x.Value.DataCenter.Value.RowId))
                 .Select(x => x.Key)
                 .ToArray();
             }

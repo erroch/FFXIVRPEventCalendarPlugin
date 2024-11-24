@@ -11,8 +11,6 @@ namespace FFXIVRPCalendarPlugin.UI
     using System.Linq;
     using System.Numerics;
 
-    using Dalamud.Logging;
-
     using FFXIVRPCalendarPlugin;
     using FFXIVRPCalendarPlugin.Models;
     using FFXIVRPCalendarPlugin.Services;
@@ -20,7 +18,7 @@ namespace FFXIVRPCalendarPlugin.UI
     using ImGuiNET;
 
     using Lumina.Excel;
-    using Lumina.Excel.GeneratedSheets;
+    using Lumina.Excel.Sheets;
 
     /// <summary>
     /// The RP Calendar debugging UI.
@@ -70,12 +68,12 @@ namespace FFXIVRPCalendarPlugin.UI
                     if (Plugin.ClientState.LocalPlayer != null)
                     {
                         ImGui.Text($"Player Found: {Plugin.ClientState.LocalPlayer.Name.TextValue}");
-                        var gameWorld = Plugin.ClientState.LocalPlayer.CurrentWorld?.GameData;
+                        var gameWorld = Plugin.ClientState.LocalPlayer.CurrentWorld.ValueNullable;
                         if (gameWorld != null)
                         {
-                            ImGui.Text($"Current Server: {gameWorld.Name.RawString}");
-                            ImGui.Text($"Current Server Id: {gameWorld.RowId}");
-                            ImGui.Text($"Current Datacenter: {gameWorld.DataCenter.Value}");
+                            ImGui.Text($"Current Server: {gameWorld.Value.Name.ExtractText()}");
+                            ImGui.Text($"Current Server Id: {gameWorld.Value.RowId}");
+                            ImGui.Text($"Current Datacenter: {gameWorld.Value.DataCenter.Value}");
 
                             ExcelSheet<World>? worldSheet = Plugin.DataManager.GetExcelSheet<World>();
                             ExcelSheet<WorldDCGroupType>? dataCentgerSheet = Plugin.DataManager.GetExcelSheet<WorldDCGroupType>();
@@ -84,15 +82,15 @@ namespace FFXIVRPCalendarPlugin.UI
                             {
                                 IDictionary<uint, World> worldDicitonary = worldSheet.ToDictionary(row => row.RowId, row => row);
                                 IDictionary<uint, WorldDCGroupType> datacenterDictionary = dataCentgerSheet.ToDictionary(row => row.RowId, row => row);
-                                World world = worldDicitonary[gameWorld.RowId];
-                                WorldDCGroupType datacenter = datacenterDictionary[world.DataCenter.Row];
-                                uint serverId = worldDicitonary[gameWorld.RowId].RowId;
-                                string serverName = worldDicitonary[gameWorld.RowId].InternalName;
-                                string datacenterName = datacenter.Name;
+                                World world = gameWorld.Value;
+                                WorldDCGroupType datacenter = gameWorld.Value.DataCenter.Value;
+                                uint serverId = gameWorld.Value.RowId;
+                                string serverName = gameWorld.Value.InternalName.ToString();
+                                string datacenterName = datacenter.Name.ExtractText();
                                 uint datacenterId = datacenter.RowId;
                                 byte regionId = datacenter.Region;
 
-                                if (worldDicitonary.ContainsKey(gameWorld.RowId))
+                                if (worldDicitonary.ContainsKey(gameWorld.Value.RowId))
                                 {
                                     ImGui.Text($"Server Id: {serverId}");
                                     ImGui.Text($"Server Name: {serverName}");
@@ -113,11 +111,11 @@ namespace FFXIVRPCalendarPlugin.UI
 
                                     if (WorldService.Worlds != null)
                                     {
-                                        List<World> validWorlds = WorldService.WorldList.OrderBy(x => x.InternalName.RawString).ToList();
+                                        List<World> validWorlds = WorldService.WorldList.OrderBy(x => x.InternalName.ExtractText()).ToList();
 
                                         foreach (World currentWorld in validWorlds)
                                         {
-                                            WorldDCGroupType dc = datacenterDictionary[currentWorld.DataCenter.Row];
+                                            WorldDCGroupType dc = datacenterDictionary[currentWorld.DataCenter.Value.RowId];
                                             string regionName = ((WorldDCRegion)dc.Region).GetDescription();
                                             ImGui.TableNextRow();
                                             ImGui.TableSetColumnIndex(0);
