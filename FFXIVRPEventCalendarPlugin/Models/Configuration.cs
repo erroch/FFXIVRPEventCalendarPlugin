@@ -65,7 +65,8 @@ namespace FFXIVRPCalendarPlugin.Models
         /// <summary>
         /// Gets or sets a value indicating whether events using real/ooc gil are to be shown.
         /// </summary>
-        public bool ShowRealGilEvents { get; set; } = false;
+        // TODO: Re-add show real gil filter when the API actually supports it.
+        // public bool ShowRealGilEvents { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the timeframe of events to display.

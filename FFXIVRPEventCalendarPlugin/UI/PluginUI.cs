@@ -470,7 +470,7 @@ namespace FFXIVRPCalendarPlugin.UI
                 return;
             }
 
-            Vector2 outerSize = new(-1, -1);
+            Vector2 outerSize = new (-1, -1);
             if (ImGui.BeginTable(
                 tableId,
                 9,
@@ -624,20 +624,20 @@ namespace FFXIVRPCalendarPlugin.UI
             ImGui.SameLine();
             ImGuiUtilities.BuildToolTip("Show only events with no recurrence schedule.  This may also show events with special one time schedule changes that are out of the ordinary.");
 
-            ImGui.SameLine();
-            bool showRealGilEvents = this.configuration.ShowRealGilEvents;
-            if (ImGui.Checkbox("Show Real Gil Events", ref showRealGilEvents))
-            {
-                if (showRealGilEvents != this.configuration.ShowRealGilEvents)
-                {
-                    this.configuration.ShowRealGilEvents = showRealGilEvents;
-                    this.configuration.Save();
-                    this.eventsService.FilterEvents();
-                }
-            }
-
-            ImGui.SameLine();
-            ImGuiUtilities.BuildToolTip("Show events that use real or out-of-character gil in any fashion including menu items, services, raffles, giveaways, etc.");
+            // TODO: Re-add show real gil filter when the API actually supports it.
+            // ImGui.SameLine();
+            // bool showRealGilEvents = this.configuration.ShowRealGilEvents;
+            // if (ImGui.Checkbox("Show Real Gil Events", ref showRealGilEvents))
+            // {
+            //     if (showRealGilEvents != this.configuration.ShowRealGilEvents)
+            //     {
+            //         this.configuration.ShowRealGilEvents = showRealGilEvents;
+            //         this.configuration.Save();
+            //         this.eventsService.FilterEvents();
+            //     }
+            // }
+            // ImGui.SameLine();
+            // ImGuiUtilities.BuildToolTip("Show events that use real or out-of-character gil in any fashion including menu items, services, raffles, giveaways, etc.");
         }
 
         private void BuildESRBOptions()

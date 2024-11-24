@@ -8,7 +8,6 @@ namespace FFXIVRPCalendarPlugin.UI
 {
     using System;
     using System.Diagnostics;
-    using System.Globalization;
     using System.Numerics;
 
     using ImGuiNET;
@@ -73,7 +72,6 @@ namespace FFXIVRPCalendarPlugin.UI
             float height = ImGui.GetTextLineHeightWithSpacing() * 1.3f;
             return new Vector2(width, height);
         }
-
 
         /// <summary>
         /// Sort column by time.
