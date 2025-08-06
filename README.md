@@ -15,10 +15,10 @@ This is a Dalamud based plugin interface to the FFXIV RP Event calendar found at
   
 ### About the FFXIV RP Event Calendar
 
-The event calenar has been in operation since early 2014, starting on Balmung and eventually spreading throughout the game worlds.
-To submit an event please use https://xiv.page.link/new
+The event calendar has been in operation since early 2014, starting on Balmung and eventually spreading throughout the game worlds.
+To submit an event please use https://xiv.fyi/new
 
-Please note, the calendar caters only to primarially roleplaying events of a non-adult only nature.
+Please note, the calendar caters only to primarily roleplaying events of a non-adult only nature.
 
 ### Contribution
 
