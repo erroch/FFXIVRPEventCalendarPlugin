@@ -234,7 +234,7 @@ namespace FFXIVRPCalendarPlugin.UI
                     this.eventsService.RefreshEvents(forceRefresh: true);
                 }
 
-                string myUrl = "https://xiv.page.link/new";
+                string myUrl = "https://xiv.fyi/new";
                 ImGui.SameLine();
                 ImGui.Text($"Add a new Event");
                 ImGui.SameLine();
@@ -246,7 +246,7 @@ namespace FFXIVRPCalendarPlugin.UI
 
                 ImGui.PopID();
 
-                string reportUrl = "https://xiv.page.link/report";
+                string reportUrl = "https://xiv.fyi/report";
                 ImGui.SameLine();
                 ImGui.Text($"Report an Inaccurate Event");
                 ImGui.SameLine();
