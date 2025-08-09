@@ -17,7 +17,7 @@ namespace FFXIVRPCalendarPlugin.Services
     using Newtonsoft.Json;
 
     /// <summary>
-    /// Provides access to varioud configuration functions and data.
+    /// Provides access to various configuration functions and data.
     /// </summary>
     public static class CalendarService
     {
@@ -28,9 +28,9 @@ namespace FFXIVRPCalendarPlugin.Services
         private static DateTime cacheAge;
 
         /// <summary>
-        /// Gets the last error encountered when trying to recieve information from the event calendar API.
+        /// Gets the last error encountered when trying to receive information from the event calendar API.
         /// </summary>
-        /// <returns>A string containing the last error enountered.</returns>
+        /// <returns>A string containing the last error encountered.</returns>
         public static string LastError()
         {
             return lastError;
@@ -115,17 +115,18 @@ namespace FFXIVRPCalendarPlugin.Services
         /// Gets a listing of RP events for the current week with padding for filtering.
         /// </summary>
         /// <param name="configuration">The <see cref="Configuration"/> containing API information.</param>
+        /// <param name="forceRefresh">A value indicating whether to force a refresh of the event cache.</param>
         /// <returns>A list of <see cref="RPEvent"/>. for the current day.</returns>
-        public static async Task<List<RPEvent>> GetEvents(Configuration configuration)
+        public static async Task<List<RPEvent>> GetEvents(Configuration configuration, bool forceRefresh)
         {
-            await MaybeUpdateCache(configuration.ApiAddress).ConfigureAwait(false);
+            await MaybeUpdateCache(configuration.ApiAddress, forceRefresh).ConfigureAwait(false);
             return RPEvents;
         }
 
-        private static async Task MaybeUpdateCache(string hostURL)
+        private static async Task MaybeUpdateCache(string hostURL, bool forceRefresh)
         {
             TimeSpan timeSpan = DateTime.UtcNow - cacheAge;
-            if (timeSpan.TotalMinutes > 30)
+            if (timeSpan.TotalMinutes > 30 || forceRefresh)
             {
                 await UpdateCache(hostURL).ConfigureAwait(false);
             }

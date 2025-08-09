@@ -77,7 +77,7 @@ namespace FFXIVRPCalendarPlugin.Services
         /// <summary>
         /// Refresh the event list.
         /// </summary>
-        /// <param name="forceRefresh">A flag indicating if the cache values should be ignored and a refresh done even if within the normal timeout interfval.</param>
+        /// <param name="forceRefresh">A flag indicating if the cache values should be ignored and a refresh done even if within the normal timeout interval.</param>
         public void RefreshEvents(bool forceRefresh = false)
         {
             if (this.lastRefresh.HasValue)
@@ -89,7 +89,7 @@ namespace FFXIVRPCalendarPlugin.Services
                 }
             }
 
-            if (!this.eventsLoaded || forceRefresh)
+            if (!this.eventsLoaded || forceRefresh || this.RoleplayEvents == null || this.RoleplayEvents.Count == 0)
             {
                 this.eventsLoaded = true;
                 this.lastRefresh = DateTime.UtcNow;
@@ -97,7 +97,7 @@ namespace FFXIVRPCalendarPlugin.Services
 
                 try
                 {
-                    Task<List<RPEvent>?>.Run(async () => await CalendarService.GetEvents(this.configuration)
+                    Task<List<RPEvent>?>.Run(async () => await CalendarService.GetEvents(this.configuration, forceRefresh)
                         .ContinueWith(
                             t =>
                             {
