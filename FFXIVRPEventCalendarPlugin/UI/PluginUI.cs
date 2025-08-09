@@ -32,7 +32,7 @@ namespace FFXIVRPCalendarPlugin.UI
 
         private const string ComboEventRangeTitle = "Event Range: ";
         private const string TextBoxSearchTitle = "Search: ";
-        private const string TimeZoneSelectionTitle = "Timezone: ";
+        private const string TimeZoneSelectionTitle = "Time Zone: ";
 
         private readonly EventsService eventsService;
         private readonly Configuration configuration;
@@ -227,7 +227,7 @@ namespace FFXIVRPCalendarPlugin.UI
                 ImGui.EndChild();
 
                 ImGui.Separator();
-                ImGui.Text($"Event list last udpated on: {this.eventsService.LastRefreshLocalTime:g}");
+                ImGui.Text($"Event list last updated on: {this.eventsService.LastRefreshLocalTime:g}");
                 ImGui.SameLine();
                 if (ImGui.Button("Refresh"))
                 {
@@ -642,7 +642,7 @@ namespace FFXIVRPCalendarPlugin.UI
 
         private void BuildESRBOptions()
         {
-            ImGui.Text("ESRB Retings:");
+            ImGui.Text("ESRB Ratings:");
             if (this.ESRBRatings == null)
             {
                 ImGui.Text("ESRBRatings Loading...");
@@ -822,8 +822,8 @@ namespace FFXIVRPCalendarPlugin.UI
                     if (ImGui.Selectable(timeFrame.GetDescription(), this.configuration.EventTimeframe == timeFrame))
                     {
                         this.configuration.EventTimeframe = timeFrame;
-                        this.eventsService.FilterEvents();
                         this.configuration.Save();
+                        this.eventsService.FilterEvents();
                     }
                 }
 
@@ -846,8 +846,8 @@ namespace FFXIVRPCalendarPlugin.UI
                         this.configuration.TimeZoneInfo == timeZoneInfo))
                     {
                         this.configuration.TimeZoneInfo = timeZoneInfo;
-                        this.eventsService.FilterEvents();
                         this.configuration.Save();
+                        this.eventsService.FilterEvents();
                     }
                 }
 
@@ -855,11 +855,11 @@ namespace FFXIVRPCalendarPlugin.UI
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Set to Local Timezone"))
+            if (ImGui.Button("Set to Local Time Zone"))
             {
                 this.configuration.TimeZoneInfo = TimeZoneInfo.Local;
-                this.eventsService.FilterEvents();
                 this.configuration.Save();
+                this.eventsService.FilterEvents();
             }
         }
 

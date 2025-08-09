@@ -40,7 +40,7 @@ namespace FFXIVRPCalendarPlugin.Models
         public string ApiAddress { get; } = DefaultApiURL;
 
         /// <summary>
-        /// Gets or sets the time zone to be used when translating event start/end dates and determing the stand and end of 'today'.
+        /// Gets or sets the time zone to be used when translating event start/end dates and to determine the stand and end of 'today'.
         /// </summary>
         public TimeZoneInfo TimeZoneInfo { get; set; } = TimeZoneInfo.Local;
 
@@ -62,9 +62,9 @@ namespace FFXIVRPCalendarPlugin.Models
         /// </summary>
         public bool OneTimeEventsOnly { get; set; } = false;
 
-        /// <summary>
-        /// Gets or sets a value indicating whether events using real/ooc gil are to be shown.
-        /// </summary>
+        // <summary>
+        // Gets or sets a value indicating whether events using real/ooc gil are to be shown.
+        // </summary>
         // TODO: Re-add show real gil filter when the API actually supports it.
         // public bool ShowRealGilEvents { get; set; } = true;
 
