@@ -13,6 +13,8 @@ namespace FFXIVRPCalendarPlugin.UI
     using System.Text;
     using System.Threading.Tasks;
 
+    using Dalamud.Bindings.ImGui;
+
     using Dalamud.Interface;
     using Dalamud.Interface.Components;
     using Dalamud.Interface.Utility;
@@ -20,8 +22,6 @@ namespace FFXIVRPCalendarPlugin.UI
     using FFXIVRPCalendarPlugin;
     using FFXIVRPCalendarPlugin.Models;
     using FFXIVRPCalendarPlugin.Services;
-
-    using ImGuiNET;
 
     /// <summary>
     /// The primary plugin UI.
@@ -489,7 +489,7 @@ namespace FFXIVRPCalendarPlugin.UI
                 ImGui.TableHeadersRow();
 
                 ImGuiTableSortSpecsPtr sortSpecs = ImGui.TableGetSortSpecs();
-                if (sortSpecs.NativePtr != null && sortSpecs.SpecsDirty)
+                if (!sortSpecs.Specs.IsNull && sortSpecs.SpecsDirty)
                 {
                     switch (sortSpecs.Specs.ColumnIndex)
                     {
@@ -865,11 +865,9 @@ namespace FFXIVRPCalendarPlugin.UI
 
         private void BuildEventSearchTextBox()
         {
-            uint buf = 64;
-
             ImGui.Text(TextBoxSearchTitle);
             ImGui.SameLine();
-            ImGui.InputText(" ", this.TextBuffer, buf);
+            ImGui.InputText(" ", this.TextBuffer, ImGuiInputTextFlags.CallbackCompletion);
         }
 
         private void LoadConfiguration()

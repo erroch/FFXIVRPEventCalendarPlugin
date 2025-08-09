@@ -11,11 +11,11 @@ namespace FFXIVRPCalendarPlugin.UI
     using System.Linq;
     using System.Numerics;
 
+    using Dalamud.Bindings.ImGui;
+
     using FFXIVRPCalendarPlugin;
     using FFXIVRPCalendarPlugin.Models;
     using FFXIVRPCalendarPlugin.Services;
-
-    using ImGuiNET;
 
     using Lumina.Excel;
     using Lumina.Excel.Sheets;
