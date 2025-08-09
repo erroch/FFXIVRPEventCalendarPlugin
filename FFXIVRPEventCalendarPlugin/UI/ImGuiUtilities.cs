@@ -10,7 +10,7 @@ namespace FFXIVRPCalendarPlugin.UI
     using System.Diagnostics;
     using System.Numerics;
 
-    using ImGuiNET;
+    using Dalamud.Bindings.ImGui;
 
     /// <summary>
     /// A collection of common ImGui functions.
