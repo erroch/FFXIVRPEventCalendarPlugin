@@ -65,10 +65,10 @@ namespace FFXIVRPCalendarPlugin.UI
                     ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollWithMouse))
                 {
                     ImGui.Text("Debug Info:");
-                    if (Plugin.ClientState.LocalPlayer != null)
+                    if (Plugin.PlayerState != null)
                     {
-                        ImGui.Text($"Player Found: {Plugin.ClientState.LocalPlayer.Name.TextValue}");
-                        var gameWorld = Plugin.ClientState.LocalPlayer.CurrentWorld.ValueNullable;
+                        ImGui.Text($"Player Found: {Plugin.PlayerState.CharacterName}");
+                        var gameWorld = Plugin.PlayerState.CurrentWorld.ValueNullable;
                         if (gameWorld != null)
                         {
                             ImGui.Text($"Current Server: {gameWorld.Value.Name.ExtractText()}");

@@ -174,7 +174,7 @@ namespace FFXIVRPCalendarPlugin.Services
                     })
                 .ToList();
 
-                World? gameWorld = Plugin.ClientState?.LocalPlayer?.CurrentWorld.ValueNullable;
+                World? gameWorld = Plugin.PlayerState?.CurrentWorld.ValueNullable;
                 if (gameWorld == null)
                 {
                     this.ServerEvents = null;
@@ -232,9 +232,9 @@ namespace FFXIVRPCalendarPlugin.Services
 
         private bool CheckForServerChange()
         {
-            if (Plugin.ClientState.LocalPlayer?.CurrentWorld.RowId != this.lastServerId)
+            if (Plugin.PlayerState?.CurrentWorld.RowId != this.lastServerId)
             {
-                this.lastServerId = Plugin.ClientState.LocalPlayer?.CurrentWorld.RowId;
+                this.lastServerId = Plugin.PlayerState?.CurrentWorld.RowId;
                 return true;
             }
 
