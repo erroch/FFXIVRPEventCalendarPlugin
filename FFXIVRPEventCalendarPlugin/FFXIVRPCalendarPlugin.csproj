@@ -19,6 +19,7 @@
     <OutputPath>$(AppData)\XIVLauncher\devPlugins\FFXIVRPCalendarPlugin\</OutputPath>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <AssemblyVersion>1.0.1.8</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
