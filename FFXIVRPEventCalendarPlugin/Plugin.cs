@@ -46,7 +46,7 @@ namespace FFXIVRPCalendarPlugin
         /// Gets the FFXIV client state.
         /// </summary>
         [PluginService]
-        public static IClientState ClientState { get; private set; } = null!;
+        public static IPlayerState PlayerState { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud Data Manger.
