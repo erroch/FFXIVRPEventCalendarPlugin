@@ -193,9 +193,7 @@ namespace FFXIVRPCalendarPlugin.Services
                         .Where(x => worldIds.Contains(x.ServerId))
                         .ToList();
 
-                    WorldDCGroupType datacenter = gameWorld.Value.DataCenter.Value; // WorldService.Datacenters?[];
-
-                    uint[] regionWorldIds = WorldService.GetRegionWorldIds(datacenter.Region);
+                    uint[] regionWorldIds = WorldService.GetRegionWorldIds(gameWorld.Value.Region);
                     this.RegionEvents = this.FilteredEvents?
                         .Where(x => regionWorldIds.Contains(x.ServerId))
                         .ToList();
