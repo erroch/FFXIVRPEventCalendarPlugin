@@ -90,36 +90,15 @@ namespace FFXIVRPCalendarPlugin.Services
         }
 
         /// <summary>
-        /// Gets an array of datacenter identifiers for a given phsyical datacenter region.
-        /// </summary>
-        /// <param name="regionId">The region identifier.</param>
-        /// <returns>An array of datacenter identifiers for the provided region.</returns>
-        public static uint[] GetRegionDatacenterIds(byte regionId)
-        {
-            if (Datacenters != null)
-            {
-                return Datacenters.Where(x => x.Value.Region == regionId)
-                    .Select(x => x.Key)
-                    .ToArray();
-            }
-            else
-            {
-                return Array.Empty<uint>();
-            }
-        }
-
-        /// <summary>
         /// Gets an array of world identifiers for a given physical datacenter region.
         /// </summary>
         /// <param name="regionId">The region identifier.</param>
         /// <returns>An array of world identifiers for the privded datacenter region.</returns>
         public static uint[] GetRegionWorldIds(byte regionId)
         {
-            uint[] datacenterIds = GetRegionDatacenterIds(regionId);
-
             if (Worlds != null)
             {
-                return Worlds.Where(x => datacenterIds.Contains(x.Value.DataCenter.Value.RowId))
+                return Worlds.Where(x => x.Value.Region == regionId)
                 .Select(x => x.Key)
                 .ToArray();
             }
