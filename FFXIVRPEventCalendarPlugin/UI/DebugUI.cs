@@ -77,7 +77,7 @@ namespace FFXIVRPCalendarPlugin.UI
 
                             ExcelSheet<World>? worldSheet = Plugin.DataManager.GetExcelSheet<World>();
                             ExcelSheet<WorldDCGroupType>? dataCenterSheet = Plugin.DataManager.GetExcelSheet<WorldDCGroupType>();
-                            
+
                             if (worldSheet != null && dataCenterSheet != null)
                             {
                                 IDictionary<uint, World> worldDicitonary = worldSheet.ToDictionary(row => row.RowId, row => row);
